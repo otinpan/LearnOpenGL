@@ -13,6 +13,7 @@ public:
 	~Shader();
 
 	unsigned int const GetShaderProgram() { return shaderProgram; } 
+	void use() const;
 
 private:
 	unsigned int shaderProgram;

@@ -36,7 +36,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
 	// Fragment shader 
@@ -69,4 +69,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 
 Shader::~Shader() {
 	glDeleteProgram(shaderProgram);
+}
+
+void Shader::use() const {
+	glUseProgram(shaderProgram);
 }
