@@ -33,15 +33,28 @@ int main() {
 	}
 
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, // left  
-		 0.5f, -0.5f, 0.0f, // right 
-		 0.0f,  0.5f, 0.0f  // top 
+		 0.25f, -0.5f, 0.0f, // left  
+		 0.75f, -0.5f, 0.0f, // right 
+		 0.5f,  0.0f, 0.0f,  // top 
+
+		-0.75f,-0.5f,0.0f, //left
+		-0.5f,0.0f,0.0f, //right
+		-0.25f,-0.5f,0.0f, //top
+	};
+
+	float vertices2[] = {
+		0.25f,0.0f,0.0f,
+		-0.25f,0.0f,0.0f,
+		0.0f,0.5f,0.0f,
+
 	};
 
 
 
 	Shader mShader("vertex.glsl", "fragment.glsl");
+	Shader mShader_yellow("vertex.glsl", "fragment_yellow.glsl");
 	Triangle mTriangle(vertices, sizeof(vertices)/sizeof(float));
+	Triangle mTriangle2(vertices2, sizeof(vertices2) / sizeof(float));
 
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
@@ -51,6 +64,9 @@ int main() {
 
 		mShader.use();
 		mTriangle.draw();
+
+		mShader_yellow.use();
+		mTriangle2.draw();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

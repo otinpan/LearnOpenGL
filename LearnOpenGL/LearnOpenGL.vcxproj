@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl" />
+    <None Include="fragment_yellow.glsl" />
     <None Include="README.md" />
     <None Include="vertex.glsl" />
   </ItemGroup>

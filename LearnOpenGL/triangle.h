@@ -5,10 +5,11 @@
 class Triangle {
 public:
 	Triangle(const float* vertices, size_t vertexCount);
-	 Triangle();
+	~Triangle();
 
 	void draw() const;
 
 private:
 	unsigned int VAO, VBO;
+	size_t vertexCount;
 };

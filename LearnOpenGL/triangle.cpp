@@ -5,7 +5,9 @@
 
 
 
-Triangle::Triangle(const float* vertices, size_t vertexCount){
+Triangle::Triangle(const float* vertices, size_t vertexCount)
+	:vertexCount(vertexCount)
+{
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
@@ -23,12 +25,12 @@ Triangle::Triangle(const float* vertices, size_t vertexCount){
 	glBindVertexArray(0);
 }
 
-Triangle::Triangle() {
+Triangle::~Triangle() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 }
 
 void Triangle::draw() const{
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, vertexCount/3);
 }
