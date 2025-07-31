@@ -33,26 +33,22 @@ int main() {
 	}
 
 	float vertices[] = {
-		 0.25f, -0.5f, 0.0f, // left  
-		 0.75f, -0.5f, 0.0f, // right 
-		 0.5f,  0.0f, 0.0f,  // top 
-
-		-0.75f,-0.5f,0.0f, //left
-		-0.5f,0.0f,0.0f, //right
-		-0.25f,-0.5f,0.0f, //top
+		 0.25f, -0.5f, 0.0f, 1.0f,0.0f,1.0f,// left  
+		 0.75f, -0.5f, 0.0f, 0.0f,1.0f,0.0f,// right 
+		 0.5f,  0.0f, 0.0f,  0.0f,0.0f,1.0f,// top 
 	};
 
 	float vertices2[] = {
-		0.25f,0.0f,0.0f,
-		-0.25f,0.0f,0.0f,
-		0.0f,0.5f,0.0f,
-
+		//position       // color 
+		0.25f,0.0f,0.0f,  1.0f,0.0f,0.0f,
+		-0.25f,0.0f,0.0f, 0.0f,1.0f,0.0f,
+		0.0f,0.5f,0.0f,   0.0f,0.0f,1.0f
 	};
 
 
 
 	Shader mShader("vertex.glsl", "fragment.glsl");
-	Shader mShader_yellow("vertex.glsl", "fragment_yellow.glsl");
+	Shader mShader_yellow("vertex.glsl", "fragment.glsl");
 	Triangle mTriangle(vertices, sizeof(vertices)/sizeof(float));
 	Triangle mTriangle2(vertices2, sizeof(vertices2) / sizeof(float));
 
@@ -62,10 +58,20 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+
+		float timeValue = glfwGetTime();
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		int vertexColorLocation = glGetUniformLocation(mShader.getShaderProgram(), "changeColor");
 		mShader.use();
+		mShader.setBool("useChangeColor", true);
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f); // uniformÇ™Ç†ÇÈahsder
 		mTriangle.draw();
 
+		float xOffset = -0.5;
+		float yOffset = -0.5;
 		mShader_yellow.use();
+		mShader_yellow.setFloat("xOffset", xOffset); //xï˚å¸Ç…ïΩçsà⁄ìÆ
+		mShader_yellow.setFloat("yOffset", yOffset); //yï˚å¸Ç…ïΩçsà⁄ìÆ
 		mTriangle2.draw();
 
 		glfwSwapBuffers(window);
