@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+
+#include"std_image.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -46,11 +49,27 @@ int main() {
 	};
 
 
-
+	// ShaderçÏê¨
 	Shader mShader("vertex.glsl", "fragment.glsl");
 	Shader mShader_yellow("vertex.glsl", "fragment.glsl");
+
+	// ê}å`çÏê¨
 	Triangle mTriangle(vertices, sizeof(vertices)/sizeof(float));
 	Triangle mTriangle2(vertices2, sizeof(vertices2) / sizeof(float));
+
+	// Texture
+	unsigned int texture;
+	glGenTextures(1, &texture); // ê∂ê¨Ç≥ÇÍÇΩIDÇtexutreÇ…äiî[
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Load Texture
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("Assets/container.jpg", &width, &height, &nrChannels, 0);
+
+	// TextureçÏê¨
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); 
+	glGenerateMipmap(GL_TEXTURE_2D);
+
 
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);

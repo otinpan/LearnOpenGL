@@ -43,6 +43,7 @@
     <None Include="fragment.glsl" />
     <None Include="fragment_yellow.glsl" />
     <None Include="Shader.md" />
+    <None Include="Texture.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -55,6 +56,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="rectangle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="std_image.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

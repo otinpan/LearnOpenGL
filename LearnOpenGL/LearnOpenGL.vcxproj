@@ -145,12 +145,14 @@
     <None Include="fragment_yellow.glsl" />
     <None Include="README.md" />
     <None Include="Shader.md" />
+    <None Include="Texture.md" />
     <None Include="vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="std_image.h" />
     <ClInclude Include="triangle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
