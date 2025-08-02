@@ -4,7 +4,7 @@
 
 class Rectangle {
 public:
-	Rectangle(const float* vertices,const int* indices, size_t vertexCount,size_t indexCount);
+	Rectangle(const float* vertices,const unsigned int* indices, size_t vertexCount,size_t indexCount);
 	~Rectangle();
 
 	void draw() const;

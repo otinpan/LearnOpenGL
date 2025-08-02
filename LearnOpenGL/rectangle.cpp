@@ -1,6 +1,6 @@
 #include"rectangle.h"
 
-Rectangle::Rectangle(const float* vertices, const int* indices, size_t vertexCount,size_t indexCount) 
+Rectangle::Rectangle(const float* vertices, const unsigned int* indices, size_t vertexCount,size_t indexCount) 
 	:vertexCount(vertexCount)
 	,indexCount(indexCount)
 {
@@ -16,8 +16,11 @@ Rectangle::Rectangle(const float* vertices, const int* indices, size_t vertexCou
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount*sizeof(int), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 

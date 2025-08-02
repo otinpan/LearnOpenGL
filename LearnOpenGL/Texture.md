@@ -95,3 +95,15 @@ glGenerateMipmap(GL_TEXTURE_2D);
 * 第6引数は0にする
 * 第7，8引数は元の画像データのフォーマットとデータ方を指定する。今回は画像をRGBフォーマットで読み込み、
 char型で保持しているため、それぞれに対応する値を渡す
+
+![container](Assets/container.jpg)
+
+
+
+
+
+
+
+
+
+

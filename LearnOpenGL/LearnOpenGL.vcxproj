@@ -114,6 +114,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /E /Y /I "$(ProjectDir)Assets" "$(OutDir)Assets"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -142,11 +145,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl" />
-    <None Include="fragment_yellow.glsl" />
+    <None Include="fragment_texture.glsl" />
+    <None Include="fragment_normal.glsl" />
     <None Include="README.md" />
     <None Include="Shader.md" />
     <None Include="Texture.md" />
     <None Include="vertex.glsl" />
+    <None Include="vertex_texture.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
