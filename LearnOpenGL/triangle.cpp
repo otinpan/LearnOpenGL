@@ -24,6 +24,7 @@ Triangle::Triangle(const float* vertices, size_t vertexCount)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))); // (location=1)
 	glEnableVertexAttribArray(1);
 
+	// âèú
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }

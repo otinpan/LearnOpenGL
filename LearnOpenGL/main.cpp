@@ -5,12 +5,15 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "shader.h"
-#include "Common.h"
 #include "rectangle.h"
 #include "triangle.h"
 #include <filesystem>
+#include "texture.h"
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow* window);
 
+float mixValue = 0.2f;
 
 int main() {
 	// GLFWèâä˙âª
@@ -86,55 +89,21 @@ int main() {
 		1,2,3
 	};
 
-	unsigned int VBO, VAO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	Texture mTexture(
+		vertices_texture,
+		indices_texture, 
+		sizeof(vertices_texture) / sizeof(float), 
+		sizeof(indices_texture) / sizeof(int)
+	);
 
-	glBindVertexArray(VAO);
+	mTexture.initializeTexture("Assets/container.jpg", 0);
+	mTexture.initializeTexture("Assets/awesome_face.jpg", 1);
+	
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_texture), vertices_texture, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_texture), indices_texture, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(3);
-
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(4);
-
-	glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(5);
-
-	unsigned int texture;
-	glGenTextures(1, &texture); // ê∂ê¨Ç≥ÇÍÇΩIDÇtexutreÇ…äiî[
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// set the texture wrapping/filtering options
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Load Texture
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("Assets/container.jpg", &width, &height, &nrChannels, 0);
-
-	// TextureçÏê¨
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-	stbi_image_free(data);
-
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	// uniform
+	mShader_texture.use();
+	mShader_texture.setInt("texture1", 0);
+	mShader_texture.setInt("texture2", 1);
 
 
 	while (!glfwWindowShouldClose(window)) {
@@ -162,9 +131,8 @@ int main() {
 
 		// Texture
 		mShader_texture.use();
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+		mTexture.draw();
+		mShader_texture.setFloat("mixValue", mixValue);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
@@ -174,3 +142,25 @@ int main() {
 	return 0;
 }
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		mixValue += 0.001f;
+		if (mixValue >= 1.0f) {
+			mixValue = 1.0f;
+		}
+	}
+	if (glfwGetKey(window,GLFW_KEY_DOWN) == GLFW_PRESS) {
+		mixValue -= 0.001f;
+		if (mixValue <= 0.0f) {
+			mixValue = 0.0f;
+		}
+	}
+}

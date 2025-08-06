@@ -22,8 +22,8 @@ Rectangle::Rectangle(const float* vertices, const unsigned int* indices, size_t 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	// âèú
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glBindVertexArray(0);
 }
 
