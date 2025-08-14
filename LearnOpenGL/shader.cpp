@@ -2,6 +2,9 @@
 #include<fstream>
 #include<sstream>
 #include<iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 	std::string vertexCode;
@@ -110,4 +113,13 @@ void Shader::setFloat(const std::string& name, float value)const {
 		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
 	}
 	glUniform1f(location, value);
+}
+
+void Shader::setMatrix4(const std::string& name, glm::mat4 matrix)const {
+	unsigned int location = glGetUniformLocation(ID, name.c_str());
+	if (location == -1) {
+		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+	}
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix
+	));
 }

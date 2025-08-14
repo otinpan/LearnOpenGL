@@ -9,7 +9,9 @@
 #include "triangle.h"
 #include <filesystem>
 #include "texture.h"
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
@@ -106,6 +108,7 @@ int main() {
 	mShader_texture.setInt("texture2", 1);
 
 
+
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 
@@ -129,10 +132,24 @@ int main() {
 		mShader_normal.setFloat("yOffset", yOffset); //yï˚å¸Ç…ïΩçsà⁄ìÆ
 		mRectangle.draw();
 
+
+		// GLM matrix
+		glm::mat4 transform1 = glm::mat4(1.0f);
+		transform1 = glm::translate(transform1, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform1 = glm::rotate(transform1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glm::mat4 transform2 = glm::mat4(1.0f);
+		transform2 = glm::translate(transform2, glm::vec3(-0.5f, 0.5f, 0.0f));
+		transform2 = glm::scale(transform2, glm::vec3(abs((float)glm::sin(glfwGetTime())), abs((float)glm::sin(glfwGetTime())), 1.0f));
+
 		// Texture
 		mShader_texture.use();
+		mShader_texture.setMatrix4("transform", transform1);
 		mTexture.draw();
 		mShader_texture.setFloat("mixValue", mixValue);
+
+		mShader_texture.setMatrix4("transform", transform2);
+		mTexture.draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
