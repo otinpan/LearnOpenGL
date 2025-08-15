@@ -146,10 +146,12 @@
     <ClCompile Include="triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Coordinate.md" />
     <None Include="fragment.glsl" />
     <None Include="fragment_texture.glsl" />
     <None Include="fragment_normal.glsl" />
     <None Include="README.md" />
+    <None Include="StartOpenGL.md" />
     <None Include="Shader.md" />
     <None Include="Texture.md" />
     <None Include="vertex.glsl" />

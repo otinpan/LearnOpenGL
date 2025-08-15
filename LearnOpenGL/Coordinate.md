@@ -1,3 +1,148 @@
+# Coodinate Systems
+
+座標は主に5つの系に分けられる
+* Local space
+* World space
+* View space
+* Clip space
+* Screen space
+
+![](https://learnopengl.com/img/getting-started/coordinate_systems.png)
+
+## Local space
+オブジェクト独自の座標系。例えば、1つの箱はそれぞれ(0,0,0)の座標を
+持つことがある。
+
+## World space
+オブジェクトが存在する世界の座標系。Model matrixを用いてLocal spaceからWorld space
+へ変換される。scale、rotate、translateの変換が行われる。
+
+## View space
+プレイヤーの目線から見た座標系。View matrixを用いてWorlad space
+からView spaceへ変換される。カメラの位置や向きが変わるとView spaceも変わる。
+
+## Clip space
+可視範囲判定を行うための座標系。Porjection matrixを用いて
+View spaceからClip spaceに変換される。もし、設定した**frustum***
+( 視錐台 )の範囲に入っていなければ、描画されない。frustumは**Orthographic projection**と
+**Perspective projection** の2種類がある。
+
+### Orthographic projection
+Orthographic projectionでは遠くの物体も近くの物体も同じ大嵩で描画される。
+![](https://learnopengl.com/img/getting-started/orthographic_frustum.png)
+
+```cpp
+glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+```
+第1引数は左端のx座標、第2引数は右端のx座標、第3引数は下端のy座標、第4引数は上端のy座標、
+第5引数は近くのz座標、第6引数は遠くのz座標を指定する。
+
+### Prespective projection
+Prespective projectionでは遠くの物体は小さく、近くの物体は大きく描画される。より現実に近い。
+`w`座標を各座標に割ることで、遠近法を表現する。
+![](https://learnopengl.com/img/getting-started/perspective_frustum.png)
+NEAR PLANEとFAR PLANEの間にある物体が描画される。
+
+```cpp
+glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 100.0f);
+```
+第1引数は視野角 (FOV)、第2引数はアスペクト比 (width/height)、第3引数は近くのz座標、第4引数は遠くのz座標を指定する。
+
+もしNEAR PLANEの値を大きくしすぎると、プレイヤーは遠くの物体を見ようとするため、オブジェクトの内部が
+見えたりすることがある。もし、頂点が[-w,w]の範囲に収まっていない場合、それはfrustumの外にあるという
+状況になる。
+
+![](https://learnopengl.com/img/getting-started/perspective_orthographic.png)
+
+## 3D
+`uniform`を用いてshaderに変換行列を渡す。
+```glsl
+#version 330 core
+layout (location=0) in vec3 aPos;
+layout (location=1) in vec2 aTexCoord;
+
+out vec2 TexCoord;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main(){
+	gl_Position =projection*view*model*vec4(aPos,1.0);
+	TexCoord=aTexCoord;
+}
+```
+```cpp
+glm::mat4 view = glm::mat4(1.0f);
+glm::mat4 projection = glm::mat4(1.0f);
+model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		
+```
+
+もし立体の図形を描画したい場合は、vertexの座標を増やす必要がある。
+
+```cpp
+	// Cube
+	float vertices_cube[] = {
+		// Front (+Z)
+	    -0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 0
+	     0.5f,-0.5f, 0.5f, 1.0f,0.0f, // 1
+	     0.5f, 0.5f, 0.5f, 1.0f,1.0f, // 2
+	    -0.5f, 0.5f, 0.5f, 0.0f,1.0f, // 3
+	
+	    // Back (-Z)
+	    -0.5f,-0.5f,-0.5f, 0.0f,0.0f, // 4
+	     0.5f,-0.5f,-0.5f, 1.0f,0.0f, // 5
+	     0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 6
+	    -0.5f, 0.5f,-0.5f, 0.0f,1.0f, // 7
+	
+	    // Left (-X)
+	    -0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 8
+	    -0.5f,-0.5f,-0.5f, 0.0f,1.0f, // 9
+	    -0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 10
+	    -0.5f, 0.5f, 0.5f, 1.0f,0.0f, // 11
+	
+	    // Right (+X)
+	     0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 12
+	     0.5f,-0.5f,-0.5f, 0.0f,1.0f, // 13
+	     0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 14
+	     0.5f, 0.5f, 0.5f, 1.0f,0.0f, // 15
+	
+	    // Bottom (-Y)
+	    -0.5f,-0.5f,-0.5f, 0.0f,1.0f, // 16
+	     0.5f,-0.5f,-0.5f, 1.0f,1.0f, // 17
+	     0.5f,-0.5f, 0.5f, 1.0f,0.0f, // 18
+	    -0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 19
+	
+	    // Top (+Y)
+	    -0.5f, 0.5f,-0.5f, 0.0f,1.0f, // 20
+	     0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 21
+	     0.5f, 0.5f, 0.5f, 1.0f,0.0f, // 22
+	    -0.5f, 0.5f, 0.5f, 0.0f,0.0f  // 23
+	};
+
+	unsigned int indices_cube[] = {
+		// 前面
+		0, 1, 2,  2, 3, 0,
+		// 背面
+		4, 5, 6,  6, 7, 4,
+		// 左側面
+		8, 9,10, 10,11, 8,
+		// 右側面
+	    12,13,14, 14,15,12,
+	    // 底面
+	    16,17,18, 18,19,16,
+	    // 上面
+	    20,21,22, 22,23,20
+	}; 
+
+```
+
+ここでは重複する座標を削除し、`indices_cube`を用いて表現している
+もし複数の立体を描画したい場合は、`model`行列を用いて座標を変換する。
+```cpp
 #define STB_IMAGE_IMPLEMENTATION
 
 #include"std_image.h"
@@ -44,87 +189,6 @@ int main() {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-
-	float vertices[] = {
-		 0.25f, -0.5f, 0.0f, 1.0f,0.0f,1.0f,// left  
-		 0.75f, -0.5f, 0.0f, 0.0f,1.0f,0.0f,// right 
-		 0.5f,  0.0f, 0.0f,  0.0f,0.0f,1.0f,// top 
-	};
-
-	float vertices_rectangle[] = {
-		// position            // color
-		-0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,  // 0: left bottom
-		-0.5f,  0.5f, 0.0f,    0.0f, 1.0f, 0.0f,  // 1: left top
-		 0.5f, -0.5f, 0.0f,    0.0f, 0.0f, 1.0f,  // 2: right bottom
-		 0.5f,  0.5f, 0.0f,    0.0f, 0.0f, 0.0f   // 3: right top
-	};
-	unsigned int indices_rectangle[] = {
-		0, 1, 2,
-		2, 1, 3
-	};
-
-
-
-	// Shader作成
-	Shader mShader("vertex.glsl", "fragment.glsl");
-	Shader mShader_normal("vertex.glsl", "fragment.glsl");
-	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
-	Shader mShader_cube("vertex_texture.glsl", "fragment_texture.glsl");
-
-	// 図形作成
-	Triangle mTriangle(vertices, sizeof(vertices)/sizeof(float));
-	Rectangle mRectangle(
-		vertices_rectangle,
-		indices_rectangle,
-		sizeof(vertices_rectangle) / sizeof(float),
-		sizeof(indices_rectangle) / sizeof(int)
-	);
-
-
-
-	// Texture
-	float vertices_texture[] = {
-		// positions          // texture coords
-		 0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   // top right
-		 0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
-		-0.5f,  0.5f, 0.0f,   0.0f, 1.0f    // top left 
-	};
-	unsigned int indices_texture[] = {
-		0,1,3,
-		1,2,3
-	};
-
-	Texture mTexture(
-		vertices_texture,
-		indices_texture, 
-		sizeof(vertices_texture) / sizeof(float), 
-		sizeof(indices_texture) / sizeof(int)
-	);
-
-	mTexture.initializeTexture("Assets/container.jpg", 0);
-	mTexture.initializeTexture("Assets/awesome_face.jpg", 1);
-	
-
-	// uniform
-	mShader_texture.use();
-	mShader_texture.setInt("texture1", 0);
-	mShader_texture.setInt("texture2", 1);
-
-	// matrix
-	glm::mat4 model = glm::mat4(1.0f); 
-	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // model matrix
-
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -2.0f)); // view matrix
-
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // projection matrix
-
-	mShader_texture.setMatrix4("model", model);
-	mShader_texture.setMatrix4("view", view);
-	mShader_texture.setMatrix4("projection", projection);
-
 
 	// depth
 	glEnable(GL_DEPTH_TEST);
@@ -220,43 +284,6 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
-		/*
-		// Triangle
-		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(mShader.getShaderProgram(), "changeColor");
-		mShader.use();
-		mShader.setBool("useChangeColor", true);
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f); // uniformがあるahsder
-		mTriangle.draw();
-
-		// Rectangle
-		float xOffset = -0.25;
-		float yOffset = -0.25;
-		mShader_normal.use();
-		mShader_normal.setFloat("xOffset", xOffset); //x方向に平行移動
-		mShader_normal.setFloat("yOffset", yOffset); //y方向に平行移動
-		mRectangle.draw();
-
-
-		// GLM matrix
-		glm::mat4 transform1 = glm::mat4(1.0f);
-		transform1 = glm::translate(transform1, glm::vec3(0.5f, -0.5f, 0.0f));
-		transform1 = glm::rotate(transform1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		glm::mat4 transform2 = glm::mat4(1.0f);
-		transform2 = glm::translate(transform2, glm::vec3(-0.5f, 0.5f, 0.0f));
-		transform2 = glm::scale(transform2, glm::vec3(abs((float)glm::sin(glfwGetTime())), abs((float)glm::sin(glfwGetTime())), 1.0f));
-
-		// Texture
-		mShader_texture.use();
-		mShader_texture.setMatrix4("transform", transform1);
-		mTexture.draw();
-		mShader_texture.setFloat("mixValue", mixValue);
-
-		mShader_texture.setMatrix4("transform", transform2);
-		mTexture.draw();
-		*/
 
 		// create transformations
 		//glm::mat4 model = glm::mat4(1.0f);
@@ -275,12 +302,7 @@ int main() {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
-			if (i % 3 != 0) {
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			}
-			else {
-				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-			}
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			mShader_cube.setMatrix4("model", model);
 			mTexture_cube.draw();
 		}
@@ -318,3 +340,4 @@ void processInput(GLFWwindow* window) {
 		}
 	}
 }
+```

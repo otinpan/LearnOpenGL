@@ -1,634 +1,251 @@
-# OpenGL
-## Vertex input
-**VBO** (Vertex Buffer Object) は頂点データをGPUのメモリに格
-納するためのオブジェクトで、1種類のデータに対して1つのVBOを作成する。
+## Triangle
 
 ```cpp
-//vertex
 	float vertices[] = {
-		-0.5f,-0.5f,0.0f,
-		0.5f,-0.5f,0.0f,
-		0.0f,0.5f,0.0f
+		 0.25f, -0.5f, 0.0f, 1.0f,0.0f,1.0f,// left  
+		 0.75f, -0.5f, 0.0f, 0.0f,1.0f,0.0f,// right 
+		 0.5f,  0.0f, 0.0f,  0.0f,0.0f,1.0f,// top 
 	};
 
+	// Shader作成
+	Shader mShader("vertex.glsl", "fragment.glsl");
 
+	// 図形作成
+	Triangle mTriangle(vertices, sizeof(vertices)/sizeof(float));
 
-	// VBO (Vertex Buffer Object) /////////////////////////////////////////////////////////////////////////////////
-	unsigned int VBO;
-	glGenBuffers(1, &VBO); //VBOを作成
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); //頂点の位置情報とVBOをバインド;
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //verticesをGPUにアップロード
-```
+	while(...){
+		
+		...
 
-* `glBindBuffer()`：これから行う頂点データへの処理はVBOに対するものと宣言
-* `glBufferData()`：頂点データをGPUに送信する
-
-
-## Vertex shader
-GPUが描画データを受け取った後、最初に実行されるのが**Vertex shader**。OpenGL専用のGLSLという言語で
-書かれる。Vertex shaderの役割は、各頂点の座標や色を計算すること。
-
-```cpp
-	// Vertex shader ///////////////////////////////////////////////////////////////////////
-	const char* vertexShaderSource = "#version 330 core\n"  //GLSLで書かれた計算処理
-		"layout (location=0)in vec3 aPos;\n"
-		"void main(){\n"
-		"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}\0";
-
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER); // Shader作成
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // Shaderとソースコードを対応
-	glCompileShader(vertexShader); //コンパイル
-
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		float timeValue = glfwGetTime();
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		int vertexColorLocation = glGetUniformLocation(mShader.getShaderProgram(), "changeColor");
+		mShader.use();
+		mShader.setBool("useChangeColor", true);
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f); // uniformがあるahsder
+		mTriangle.draw();
 	}
 ```
 
-* `vertexShaderSource`：GLSLで書かれたコード。ここでは`location=0`のデータに対して処理を行おうとしている。
-* `glCompileShader()：vertexShader`をコンパイル
-
-## Fragment shader
-スクリーンの各画素について実行される。それぞれのピクセルとそれらをなんの色
-で塗るかを計算する。
-
+## Rectangle
 ```cpp
-	// Fragment shader //////////////////////////////////////////////////////////
-	const char* fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"void main(){\n"
-		"	FragColor=vec4(1.0f,0.5f,0.2f,1.0f);\n"
-		"}\0";
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-```
-
-* `out`：この変数は出力であることを指定する
-* `FragColor`：出力となる変数名
-
-## Linking Vertex Attributes
-いまの状態は
-* GPUに頂点データを送信s
-* Vertex shaderをコンパイル
-* Fragment shaderをコンパイル
-
-このままでは何も表示されない。またシェーダーとVBOはなにも関連していない。
-haderとVBOを関連付ける必要がある。
-
-```cpp
-// Layout (loction=0)としてシェーダーに渡す
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); //Layoutの変数にVBOを紐づけ
-glEnableVertexAttribArray(0); //VBOの中身をシェーダーに送る
-```
-
-
-ただ、もし複数のVBOがあり、それに対してシェーダーで処理したいとき、何回も
-`glVertexAttribPointer`でVBOとshaderを指定する必要が出てくる。
-
-```cpp
-
-// ---------- 位置情報のVBO ----------
-unsigned int VBO_position;
-glGenBuffers(1, &VBO_position);
-glBindBuffer(GL_ARRAY_BUFFER, VBO_position);
-glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
-
-// layout (location = 0) としてシェーダに渡す
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-glEnableVertexAttribArray(0);
-
-// ---------- 色情報のVBO ----------
-unsigned int VBO_color;
-glGenBuffers(1, &VBO_color);
-glBindBuffer(GL_ARRAY_BUFFER, VBO_color);
-glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-
-// layout (location = 1) としてシェーダに渡す
-glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-glEnableVertexAttribArray(1);
-```
-また`glVertexAttribPointer()`の設定は毎フレーム失われるため、毎回ループで
-設定する必要がある。
-
-```cpp
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glBindBuffer(GL_ARRAY_BUFFER, VBO); //現在使うVBOを指定
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); //Layoutの変数にVBOを紐づけ
-		glEnableVertexAttribArray(0); //VBOの中身をシェーダーに送る
-		glUseProgram(shaderProgram);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();  //イベントがあればcallbackを呼ぶ
-	}
-```
-
-<details>
-
-```cpp
-// glad.h は最初に！
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
-
-
-
-int main() {
-
-	// GLFW初期化
-	glfwInit();
-
-	// Window作成
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(800, 600, "LeranOpenGL", NULL, NULL);
-	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window); //windowを現在のスレッドで使えるようにする
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); //callbackを登録
-	// ウィンドウがリサイズされたら自動でcallbackが呼ばれる
-
-	// GLADの初期化
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
-
-
-	//vertex
-	float vertices[] = {
-		-0.5f,-0.5f,0.0f,
-		0.5f,-0.5f,0.0f,
-		0.0f,0.5f,0.0f
+	float vertices_rectangle[] = {
+		// position            // color
+		-0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,  // 0: left bottom
+		-0.5f,  0.5f, 0.0f,    0.0f, 1.0f, 0.0f,  // 1: left top
+		 0.5f, -0.5f, 0.0f,    0.0f, 0.0f, 1.0f,  // 2: right bottom
+		 0.5f,  0.5f, 0.0f,    0.0f, 0.0f, 0.0f   // 3: right top
+	};
+	unsigned int indices_rectangle[] = {
+		0, 1, 2,
+		2, 1, 3
 	};
 
+	//Shader作成
+	Shader mShader_normal("vertex.glsl", "fragment.glsl");
 
-
-	// VBO (Vertex Buffer Object) /////////////////////////////////////////////////////////////////////////////////
-	unsigned int VBO;
-	glGenBuffers(1, &VBO); //VBOを作成
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); //頂点の位置情報とVBOをバインド;
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //verticesをGPUにアップロード
-
-
-	// 頂点属性の設定
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); //Layoutの変数にVBOを紐づけ
-	glEnableVertexAttribArray(0); //VBOの中身をシェーダーに送る
-
-	// Vertex shader ///////////////////////////////////////////////////////////////////////
-	const char* vertexShaderSource = "#version 330 core\n"  //GLSLで書かれた計算処理
-		"layout (location=0)in vec3 aPos;\n"
-		"void main(){\n"
-		"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}\0";
-
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER); // Shader作成
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // Shaderとソースコードを対応
-	glCompileShader(vertexShader); //コンパイル
-
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+	// Rectangle作成
+	Rectangle mRectangle(
+		vertices_rectangle,
+		indices_rectangle,
+		sizeof(vertices_rectangle) / sizeof(float),
+		sizeof(indices_rectangle) / sizeof(int)
+	);
+	while(...){
+		
+		...
+		float xOffset = -0.25;
+		float yOffset = -0.25;
+		mShader_normal.use();
+		mShader_normal.setFloat("xOffset", xOffset); //x方向に平行移動
+		mShader_normal.setFloat("yOffset", yOffset); //y方向に平行移動
+		mRectangle.draw();
 	}
-
-	// Fragment shader //////////////////////////////////////////////////////////
-	const char* fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"void main(){\n"
-		"	FragColor=vec4(1.0f,0.5f,0.2f,1.0f);\n"
-		"}\0";
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// Shader program
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram(); // shader program作成
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader); // vertex shaderとfragment shaderをアタッチ (ラスタライズは勝手にやってくれる) 
-	glLinkProgram(shaderProgram); // vertex shaderの出力とfragment shaderの入力が正しくつながっていないとエラー
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
-	}
-
-	glUseProgram(shaderProgram); 
-	glDeleteShader(vertexShader); 
-	glDeleteShader(fragmentShader);
-
-
-
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glBindBuffer(GL_ARRAY_BUFFER, VBO); //現在使うVBOを指定
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); //Layoutの変数にVBOを紐づけ
-		glEnableVertexAttribArray(0); //VBOの中身をシェーダーに送る
-		glUseProgram(shaderProgram);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();  //イベントがあればcallbackを呼ぶ
-	}
-
-	glfwTerminate();
-	return 0;
-}
-
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-}
-
-void processInput(GLFWwindow* window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, true);
-	}
-}
 ```
 
-</details>
-
-### VAO
-**VAO** (Vertex Array Object) はループのたびにで頂点とシェーダーを結びつける必要がなくなる。
-具体的には以下の情報を保持する
-* `glEnableVertexAttribArray`の呼び出し状態
-* `glVertexAttibPointer`によって設定された頂点属性
-* `glVertexAttribPointer`を通じて頂点属性に関連付けられたVBO
-
-<details>
-
+## Texture
 ```cpp
-// glad.h は最初に！
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
-
-
-
-int main() {
-
-	// GLFW初期化
-	glfwInit();
-
-	// Window作成
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(800, 600, "LeranOpenGL", NULL, NULL);
-	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window); //windowを現在のスレッドで使えるようにする
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); //callbackを登録
-	// ウィンドウがリサイズされたら自動でcallbackが呼ばれる
-
-	// GLADの初期化
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
-
-
-	//vertex
-	float vertices[] = {
-		-0.5f,-0.5f,0.0f,
-		0.5f,-0.5f,0.0f,
-		0.0f,0.5f,0.0f
+	// Texture
+	float vertices_texture[] = {
+		// positions          // colors           // texture coords
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 	};
-
-
-
-	// VBO (Vertex Buffer Object)  VAO (Vertex Array Object) ////////////////////////////////////////
-	unsigned int VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //VBOのバインドを解除
-	glBindVertexArray(0); //VAOのバインドを解除
-
-	// Vertex shader ///////////////////////////////////////////////////////////////////////
-	const char* vertexShaderSource = "#version 330 core\n"  //GLSLで書かれた計算処理
-		"layout (location=0)in vec3 aPos;\n"
-		"void main(){\n"
-		"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}\0";
-
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER); // Shader作成
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // Shaderとソースコードを対応
-	glCompileShader(vertexShader); //コンパイル
-
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// Fragment shader //////////////////////////////////////////////////////////
-	const char* fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"void main(){\n"
-		"	FragColor=vec4(1.0f,0.5f,0.2f,1.0f);\n"
-		"}\0";
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// Shader program
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram(); // shader program作成
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader); // vertex shaderとfragment shaderをアタッチ (ラスタライズは勝手にやってくれる) 
-	glLinkProgram(shaderProgram); // vertex shaderの出力とfragment shaderの入力が正しくつながっていないとエラー
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
-	}
-
-	glUseProgram(shaderProgram); 
-	glDeleteShader(vertexShader); 
-	glDeleteShader(fragmentShader);
-
-
-
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();  //イベントがあればcallbackを呼ぶ
-	}
-
-	glfwTerminate();
-	return 0;
-}
-
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-}
-
-void processInput(GLFWwindow* window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, true);
-	}
-}
-```
-
-</details>
-
-### 四角形の描画
-
-
-<details>
-
-```cpp
-// glad.h は最初に！
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
-
-
-
-int main() {
-
-	// GLFW初期化
-	glfwInit();
-
-	// Window作成
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(800, 600, "LeranOpenGL", NULL, NULL);
-	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window); //windowを現在のスレッドで使えるようにする
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); //callbackを登録
-	// ウィンドウがリサイズされたら自動でcallbackが呼ばれる
-
-	// GLADの初期化
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
-
-
-	//vertex
-	float vertices[] = {
-		0.5f,  0.5f, 0.0f,  // top right
-		 0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f // top left
-	};
-
-	unsigned int indices[] = {
+	unsigned int indices_texture[] = {
 		0,1,3,
 		1,2,3
 	};
 
-	// VBO VAO EBO (Elemental Buffer Object)  //////////////////////////////////////////////////
-	unsigned int VBO, VAO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	// Shader作成
+	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
 
-	glBindVertexArray(VAO);
+	// Texture作成
+	Texture mTexture(
+		vertices_texture,
+		indices_texture,
+		sizeof(vertices_texture) / sizeof(float),
+		sizeof(indices_texture) / sizeof(int)
+	);
+	
+	// 画像の登録
+	mTexture.initializeTexture("Assets/container.jpg", 0);
+	mTexture.initializeTexture("Assets/awesome_face.jpg", 1);
+	
 
-	// VBO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// uniform
+	mShader_texture.use();
+	mShader_texture.setInt("texture1", 0);
+	mShader_texture.setInt("texture2", 1);
 
-	// EBO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	// matrix
+	glm::mat4 model = glm::mat4(1.0f); 
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // model matrix
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -2.0f)); // view matrix
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //VBOのバインドを解除
-	glBindVertexArray(0); //VAOのバインドを解除
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // projection matrix
 
-	// Vertex shader ///////////////////////////////////////////////////////////////////////
-	const char* vertexShaderSource = "#version 330 core\n"  //GLSLで書かれた計算処理
-		"layout (location=0)in vec3 aPos;\n"
-		"void main(){\n"
-		"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}\0";
+	mShader_texture.setMatrix4("model", model);
+	mShader_texture.setMatrix4("view", view);
+	mShader_texture.setMatrix4("projection", projection);
 
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER); // Shader作成
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // Shaderとソースコードを対応
-	glCompileShader(vertexShader); //コンパイル
 
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	while(...){
+		
+		...
+		mShader_texture.use();
+		mShader_texture.setMatrix4("transform", transform1);
+		mTexture.draw();
+		mShader_texture.setFloat("mixValue", mixValue);
 
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		mShader_texture.setMatrix4("transform", transform2);
+		mTexture.draw();
 	}
-
-	// Fragment shader //////////////////////////////////////////////////////////
-	const char* fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"void main(){\n"
-		"	FragColor=vec4(1.0f,0.5f,0.2f,1.0f);\n"
-		"}\0";
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// Shader program
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram(); // shader program作成
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader); // vertex shaderとfragment shaderをアタッチ (ラスタライズは勝手にやってくれる) 
-	glLinkProgram(shaderProgram); // vertex shaderの出力とfragment shaderの入力が正しくつながっていないとエラー
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n" << infoLog << std::endl;
-	}
-
-
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();  //イベントがあればcallbackを呼ぶ
-	}
-
-
-	glDeleteVertexArrays(1,&VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-	glDeleteProgram(shaderProgram);
-
-	glfwTerminate();
-	return 0;
-}
-
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-}
-
-void processInput(GLFWwindow* window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, true);
-	}
-}
 ```
-</details>
 
+## Cube
+```cpp
+	// depth
+	glEnable(GL_DEPTH_TEST);
+
+	// Cube
+	float vertices_cube[] = {
+		// Front (+Z)
+	    -0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 0
+	     0.5f,-0.5f, 0.5f, 1.0f,0.0f, // 1
+	     0.5f, 0.5f, 0.5f, 1.0f,1.0f, // 2
+	    -0.5f, 0.5f, 0.5f, 0.0f,1.0f, // 3
+	
+	    // Back (-Z)
+	    -0.5f,-0.5f,-0.5f, 0.0f,0.0f, // 4
+	     0.5f,-0.5f,-0.5f, 1.0f,0.0f, // 5
+	     0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 6
+	    -0.5f, 0.5f,-0.5f, 0.0f,1.0f, // 7
+	
+	    // Left (-X)
+	    -0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 8
+	    -0.5f,-0.5f,-0.5f, 0.0f,1.0f, // 9
+	    -0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 10
+	    -0.5f, 0.5f, 0.5f, 1.0f,0.0f, // 11
+	
+	    // Right (+X)
+	     0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 12
+	     0.5f,-0.5f,-0.5f, 0.0f,1.0f, // 13
+	     0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 14
+	     0.5f, 0.5f, 0.5f, 1.0f,0.0f, // 15
+	
+	    // Bottom (-Y)
+	    -0.5f,-0.5f,-0.5f, 0.0f,1.0f, // 16
+	     0.5f,-0.5f,-0.5f, 1.0f,1.0f, // 17
+	     0.5f,-0.5f, 0.5f, 1.0f,0.0f, // 18
+	    -0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 19
+	
+	    // Top (+Y)
+	    -0.5f, 0.5f,-0.5f, 0.0f,1.0f, // 20
+	     0.5f, 0.5f,-0.5f, 1.0f,1.0f, // 21
+	     0.5f, 0.5f, 0.5f, 1.0f,0.0f, // 22
+	    -0.5f, 0.5f, 0.5f, 0.0f,0.0f  // 23
+	};
+
+	unsigned int indices_cube[] = {
+		// 前面
+		0, 1, 2,  2, 3, 0,
+		// 背面
+		4, 5, 6,  6, 7, 4,
+		// 左側面
+		8, 9,10, 10,11, 8,
+		// 右側面
+	    12,13,14, 14,15,12,
+	    // 底面
+	    16,17,18, 18,19,16,
+	    // 上面
+	    20,21,22, 22,23,20
+	}; 
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+	// Shader作成
+	Shader mShader_cube("vertex_texture.glsl", "fragment_texture.glsl");
+
+	// Cube作成
+	Texture mTexture_cube(
+		vertices_cube,
+		indices_cube,
+		sizeof(vertices_cube) / sizeof(float),
+		sizeof(indices_cube)/sizeof(int)
+	);
+
+	// 画像の登録
+	mTexture_cube.initializeTexture("Assets/container.jpg", 0);
+	mTexture_cube.initializeTexture("Assets/awesome_face.jpg", 1);
+
+	// uniform 
+	mShader_cube.use();
+	mShader_cube.setInt("texture1", 0);
+	mShader_cube.setInt("texture2", 1);
+
+	while(...){
+
+	    ...
+
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		mShader_cube.use();
+
+		mShader_cube.setMatrix4("view", view);
+		mShader_cube.setMatrix4("projection", projection);
+		mShader_cube.setFloat("mixValue", mixValue);
+
+		for (unsigned int i = 0; i < 10; i++) {
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			if (i % 3 != 0) {
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			}
+			else {
+				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+			}
+			mShader_cube.setMatrix4("model", model);
+			mTexture_cube.draw();
+		}
+	}
+```
