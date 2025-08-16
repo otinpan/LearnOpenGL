@@ -12,13 +12,20 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "camera.h"
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 float mixValue = 0.2f;
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 int main() {
 	// GLFW初期化
@@ -37,13 +44,29 @@ int main() {
 	}
 	glfwMakeContextCurrent(window); //windowを現在のスレッドで使えるようにする
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); //callbackを登録
-	// ウィンドウがリサイズされたら自動でcallbackが呼ばれる
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	// GLADの初期化
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+
+
+	// カーソルキャプチャ
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// カメラ生成
+	Camera mCamera(
+		glm::vec3(0.0f, 0.0f, 3.0f), // カメラの位置
+		glm::vec3(0.0f, 0.0f, -1.0f), // カメラの前方ベクトル
+		glm::vec3(0.0f, 1.0f, 0.0f)   // カメラの上方向ベクトル
+	);
+
+	// callbackからmCameraにアクセスできるようにする
+	glfwSetWindowUserPointer(window, &mCamera);
+
 
 	float vertices[] = {
 		 0.25f, -0.5f, 0.0f, 1.0f,0.0f,1.0f,// left  
@@ -119,7 +142,7 @@ int main() {
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -2.0f)); // view matrix
 
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // projection matrix
+	projection = glm::perspective(glm::radians(mCamera.getFov()), 800.0f / 600.0f, 0.1f, 100.0f); // projection matrix
 
 	mShader_texture.setMatrix4("model", model);
 	mShader_texture.setMatrix4("view", view);
@@ -215,6 +238,10 @@ int main() {
 
 
 	while (!glfwWindowShouldClose(window)) {
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		processInput(window);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -258,13 +285,17 @@ int main() {
 		mTexture.draw();
 		*/
 
-		// create transformations
-		//glm::mat4 model = glm::mat4(1.0f);
+
+		// model matrix
+		/*glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));*/
+
+		// view matrix
 		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+
+		// projection matrix
+		projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		mShader_cube.use();
 
 		mShader_cube.setMatrix4("view", view);
@@ -300,11 +331,44 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+	auto* cam = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+	if (!cam)return;
+	cam->updateDirection(xpos, ypos);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	auto* cam = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+	if (!cam)return;
+	cam->updateFov(yoffset);
+}
+
 void processInput(GLFWwindow* window) {
+	// カメラの移動
+	auto* cam = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+	if (!cam)return;
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		cam->updatePosition(FORWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		cam->updatePosition(BACKWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		cam->updatePosition(LEFT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		cam->updatePosition(RIGHT, deltaTime);
+	}
+
+
+	// windowサイズ
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
 
+
+	// mixValueの調整
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		mixValue += 0.001f;
 		if (mixValue >= 1.0f) {

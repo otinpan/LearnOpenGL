@@ -249,3 +249,86 @@
 		}
 	}
 ```
+
+## Camera
+```cpp
+int main(){
+    // カーソルキャプチャ
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// カメラ生成
+	Camera mCamera(
+		glm::vec3(0.0f, 0.0f, 3.0f), // カメラの位置
+		glm::vec3(0.0f, 0.0f, -1.0f), // カメラの前方ベクトル
+		glm::vec3(0.0f, 1.0f, 0.0f)   // カメラの上方向ベクトル
+	);
+
+	// callbackからmCameraにアクセスできるようにする
+	glfwSetWindowUserPointer(window, &mCamera);
+
+	while(...){
+	    ...
+		// view matrix
+		glm::mat4 view = glm::mat4(1.0f);
+		view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+
+		// projection matrix
+		projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		mShader_cube.use();
+	}
+}
+
+
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+	auto* cam = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+	if (!cam)return;
+	cam->updateDirection(xpos, ypos);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	auto* cam = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+	if (!cam)return;
+	cam->updateFov(yoffset);
+}
+
+void processInput(GLFWwindow* window) {
+	// カメラの移動
+	auto* cam = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+	if (!cam)return;
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		cam->updatePosition(FORWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		cam->updatePosition(BACKWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		cam->updatePosition(LEFT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		cam->updatePosition(RIGHT, deltaTime);
+	}
+
+
+	// windowサイズ
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+
+
+	// mixValueの調整
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		mixValue += 0.001f;
+		if (mixValue >= 1.0f) {
+			mixValue = 1.0f;
+		}
+	}
+	if (glfwGetKey(window,GLFW_KEY_DOWN) == GLFW_PRESS) {
+		mixValue -= 0.001f;
+		if (mixValue <= 0.0f) {
+			mixValue = 0.0f;
+		}
+	}
+}
+```
