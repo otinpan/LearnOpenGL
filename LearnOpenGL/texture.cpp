@@ -2,11 +2,11 @@
 #include <iostream>
 #include"std_image.h"
 
-Texture::Texture(const float* vertices, const unsigned int* indices, size_t vertexCount, size_t indexCount)
-	:vertexCount(vertexCount)
-	, indexCount(indexCount)
+Texture::Texture(const float* vertices, size_t vertexBytes, const unsigned int* indices,  size_t indexBytes,GLenum indexType,
+	const std::vector<VertexAttribute>& layout)
+	:indexType(indexType)
+	,indexCount(calcIndexCount(indexBytes,indexType))
 {
-	
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -14,17 +14,20 @@ Texture::Texture(const float* vertices, const unsigned int* indices, size_t vert
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount*sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexBytes, vertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount*sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
+	for (const auto& a : layout) {
+		glEnableVertexAttribArray(a.index);
+		if (a.integer) {
+			glVertexAttribIPointer(a.index, a.size, a.type, a.stride, (const void*)a.offset);
+		}
+		else {
+			glVertexAttribPointer(a.index, a.size, a.type, a.normalized, a.stride, (const void*)a.offset);
+		}
+	}
 
 
 	// âèú
@@ -38,7 +41,7 @@ Texture::~Texture() {
 	glDeleteBuffers(1, &EBO);
 }
 
-void Texture::initializeTexture(const char* texturePath,int textureUnit) {
+void Texture::initializeTexture(const char* texturePath, int textureUnit) {
 	if (textureUnit < 0 || textureUnit >= 16) {
 		std::cout << "Only 16 texture are suported" << std::endl;
 		return;
@@ -60,15 +63,15 @@ void Texture::initializeTexture(const char* texturePath,int textureUnit) {
 	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
 
 	// TextureçÏê¨
-	if(data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	if (data) {
+		GLenum format = (nrChannels == 1) ? GL_RED : (nrChannels == 3) ? GL_RGB : GL_RGBA;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		stbi_image_free(data);
 	}
 	else {
 		std::cout << "Failed to load texture" << std::endl;
 	}
-
-	stbi_image_free(data);
 
 }
 
@@ -87,10 +90,18 @@ void Texture::draw() const {
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
-	
+
 }
 
 
 const std::array<unsigned int, 16>& Texture::getTextures() const {
 	return textures;
+}
+
+
+GLsizei Texture::calcIndexCount(size_t indexBytes, GLenum indexType) {
+	size_t elem = (indexType == GL_UNSIGNED_INT) ? sizeof(unsigned int) :
+		(indexType == GL_UNSIGNED_SHORT) ? sizeof(unsigned short) :
+		sizeof(unsigned char);
+	return static_cast<GLsizei>(indexBytes / elem);
 }

@@ -150,6 +150,8 @@
     <None Include="Camera.md" />
     <None Include="Coordinate.md" />
     <None Include="fragment.glsl" />
+    <None Include="fragment_light_cube.glsl" />
+    <None Include="fragment_color.glsl" />
     <None Include="fragment_texture.glsl" />
     <None Include="fragment_normal.glsl" />
     <None Include="README.md" />
@@ -157,6 +159,8 @@
     <None Include="Shader.md" />
     <None Include="Texture.md" />
     <None Include="vertex.glsl" />
+    <None Include="vertex_color.glsl" />
+    <None Include="vertex_light_cube.glsl" />
     <None Include="vertex_texture.glsl" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +170,7 @@
     <ClInclude Include="std_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="triangle.h" />
+    <ClInclude Include="vertex_layout.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

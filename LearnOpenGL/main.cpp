@@ -13,6 +13,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "camera.h"
+#include "vertex_layout.h" 
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -92,7 +94,8 @@ int main() {
 	Shader mShader("vertex.glsl", "fragment.glsl");
 	Shader mShader_normal("vertex.glsl", "fragment.glsl");
 	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
-	Shader mShader_cube("vertex_texture.glsl", "fragment_texture.glsl");
+	Shader mShader_cube("vertex_color.glsl", "fragment_color.glsl");
+	Shader mShader_lighting("vertex_light_cube.glsl", "fragment_light_cube.glsl");
 
 	// ê}å`çÏê¨
 	Triangle mTriangle(vertices, sizeof(vertices)/sizeof(float));
@@ -105,8 +108,8 @@ int main() {
 
 
 
-	// Texture
-	float vertices_texture[] = {
+	// Texture //////////////////////////////////////////////////////////////////////////////////////
+	/*float vertices_texture[] = {
 		// positions          // texture coords
 		 0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   // top right
 		 0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
@@ -118,11 +121,19 @@ int main() {
 		1,2,3
 	};
 
+	std::vector<VertexAttribute> layout_texture = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),0,false}, //position
+		{1,2,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),(size_t)(3 * sizeof(float)),false}  //index}
+	};
+
+
 	Texture mTexture(
 		vertices_texture,
-		indices_texture, 
-		sizeof(vertices_texture) / sizeof(float), 
-		sizeof(indices_texture) / sizeof(int)
+		sizeof(vertices_texture),
+		indices_texture,
+		sizeof(indices_texture),
+		GL_UNSIGNED_INT,
+		layout_texture
 	);
 
 	mTexture.initializeTexture("Assets/container.jpg", 0);
@@ -146,14 +157,14 @@ int main() {
 
 	mShader_texture.setMatrix4("model", model);
 	mShader_texture.setMatrix4("view", view);
-	mShader_texture.setMatrix4("projection", projection);
+	mShader_texture.setMatrix4("projection", projection);*/
 
 
-	// depth
+	// depth 
 	glEnable(GL_DEPTH_TEST);
 
-	// Cube
-	float vertices_cube[] = {
+	// Cube ///////////////////////////////////////////////////////////////////////////////////////
+	/*float vertices_cube[] = {
 		// Front (+Z)
 	    -0.5f,-0.5f, 0.5f, 0.0f,0.0f, // 0
 	     0.5f,-0.5f, 0.5f, 1.0f,0.0f, // 1
@@ -219,13 +230,19 @@ int main() {
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	std::vector<VertexAttribute> layout_cube = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),0,false}, //position
+		{1,2,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),(size_t)(3 * sizeof(float)),false} //index 
+	};
 
 
 	Texture mTexture_cube(
 		vertices_cube,
+		sizeof(vertices_cube),     
 		indices_cube,
-		sizeof(vertices_cube) / sizeof(float),
-		sizeof(indices_cube)/sizeof(int)
+		sizeof(indices_cube),      
+		GL_UNSIGNED_INT,
+		layout_cube                
 	);
 
 	mTexture_cube.initializeTexture("Assets/container.jpg", 0);
@@ -234,7 +251,77 @@ int main() {
 	// uniform 
 	mShader_cube.use();
 	mShader_cube.setInt("texture1", 0);
-	mShader_cube.setInt("texture2", 1);
+	mShader_cube.setInt("texture2", 1);*/
+
+	float vertices_linghting_cube[] = {
+		// Front (+Z)
+		-0.5f,-0.5f, 0.5f, 
+		 0.5f,-0.5f, 0.5f, 
+		 0.5f, 0.5f, 0.5f,
+		-0.5f, 0.5f, 0.5f,
+
+		// Back (-Z)
+		-0.5f,-0.5f,-0.5f,
+		 0.5f,-0.5f,-0.5f, 
+		 0.5f, 0.5f,-0.5f, 
+		-0.5f, 0.5f,-0.5f, 
+
+		// Left (-X)
+		-0.5f,-0.5f, 0.5f,
+		-0.5f,-0.5f,-0.5f, 
+		-0.5f, 0.5f,-0.5f, 
+		-0.5f, 0.5f, 0.5f,
+
+		// Right (+X)
+		 0.5f,-0.5f, 0.5f,
+		 0.5f,-0.5f,-0.5f, 
+		 0.5f, 0.5f,-0.5f, 
+		 0.5f, 0.5f, 0.5f,
+
+		// Bottom (-Y)
+		-0.5f,-0.5f,-0.5f, 
+		 0.5f,-0.5f,-0.5f, 
+		 0.5f,-0.5f, 0.5f, 
+		-0.5f,-0.5f, 0.5f, 
+
+		// Top (+Y)
+		-0.5f, 0.5f,-0.5f, 
+		 0.5f, 0.5f,-0.5f, 
+		 0.5f, 0.5f, 0.5f, 
+		-0.5f, 0.5f, 0.5f, 
+	};
+
+	unsigned int indices_cube[] = {
+		// ëOñ 
+		0, 1, 2,  2, 3, 0,
+		// îwñ 
+		4, 5, 6,  6, 7, 4,
+		// ç∂ë§ñ 
+		8, 9,10, 10,11, 8,
+		// âEë§ñ 
+		12,13,14, 14,15,12,
+		// íÍñ 
+		16,17,18, 18,19,16,
+		// è„ñ 
+		20,21,22, 22,23,20
+	};
+
+	std::vector<VertexAttribute> layout_lighting_cube = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(3 * sizeof(float)),0,false},
+	};
+
+	Texture mLighting_cube(
+		vertices_linghting_cube,
+		sizeof(vertices_linghting_cube),
+		indices_cube,
+		sizeof(indices_cube),
+		GL_UNSIGNED_INT,
+		layout_lighting_cube
+	);
+
+	// light ///////////////////////////////////////////////////////////
+	glm::vec3 mLightPos(1.2f, 1.0f, 2.0f);
+
 
 
 	while (!glfwWindowShouldClose(window)) {
@@ -291,7 +378,7 @@ int main() {
 		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));*/
 
 		// view matrix
-		glm::mat4 view = glm::mat4(1.0f);
+		/*glm::mat4 view = glm::mat4(1.0f);
 		view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
 
 		// projection matrix
@@ -314,9 +401,32 @@ int main() {
 			}
 			mShader_cube.setMatrix4("model", model);
 			mTexture_cube.draw();
-		}
+		}*/
 
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+		mShader_cube.use();
+		mShader_cube.setMatrix4("view", view);
+		mShader_cube.setMatrix4("projection", projection);
+		mShader_cube.setMatrix4("model", model);
+		mShader_cube.setVec3("objectColor", glm::vec3(1.0f, 0.4, 0.31f));
+		mShader_cube.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+		mLighting_cube.draw();
+
+		// light////////////
+		mShader_lighting.use();
+		mShader_lighting.setMatrix4("projection", projection);
+		mShader_lighting.setMatrix4("view", view);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, mLightPos);
+		model = glm::scale(model, glm::vec3(0.2f));
+		mShader_lighting.setMatrix4("model", model);
+
+		mLighting_cube.draw();
+		
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

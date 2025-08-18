@@ -33,6 +33,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 	catch (std::ifstream::failure e)
 	{
 		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+		throw;
 	}
 	const char* vShaderCode = vertexCode.c_str();
 	const char* fShaderCode = fragmentCode.c_str();
@@ -49,7 +50,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		throw std::runtime_error("vertex compile failed");
 	}
 
 	// Fragment shader 
@@ -60,7 +62,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+		throw std::runtime_error("fragment compile failed");
 	}
 
 	// link shader
@@ -73,6 +76,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 	if (!success) {
 		glGetProgramInfoLog(ID, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		throw std::runtime_error("link failed");
 	}
 
 	// delete
@@ -122,4 +126,12 @@ void Shader::setMatrix4(const std::string& name, glm::mat4 matrix)const {
 	}
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix
 	));
+}
+
+void Shader::setVec3(const std::string& name, glm::vec3 vec) const {
+	unsigned int location = glGetUniformLocation(ID, name.c_str());
+	if (location == -1) {
+		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+	}
+	glUniform3fv(location, 1, glm::value_ptr(vec));
 }

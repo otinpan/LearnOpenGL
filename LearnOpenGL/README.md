@@ -67,27 +67,34 @@
 ```cpp
 	// Texture
 	float vertices_texture[] = {
-		// positions          // colors           // texture coords
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+		// positions          // texture coords
+		 0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   0.0f, 1.0f    // top left 
 	};
 	unsigned int indices_texture[] = {
 		0,1,3,
 		1,2,3
 	};
 
-	// ShaderçÏê¨
-	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
+	std::vector<VertexAttribute> layout_texture = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),0,false}, //position
+		{1,2,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),(size_t)(3 * sizeof(float)),false}  //index}
+	};
 
-	// TextureçÏê¨
+
 	Texture mTexture(
 		vertices_texture,
+		sizeof(vertices_texture),
 		indices_texture,
-		sizeof(vertices_texture) / sizeof(float),
-		sizeof(indices_texture) / sizeof(int)
+		sizeof(indices_texture),
+		GL_UNSIGNED_INT,
+		layout_texture
 	);
+
+	// ShaderçÏê¨
+	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
 	
 	// âÊëúÇÃìoò^
 	mTexture.initializeTexture("Assets/container.jpg", 0);
@@ -203,11 +210,19 @@
 	Shader mShader_cube("vertex_texture.glsl", "fragment_texture.glsl");
 
 	// CubeçÏê¨
+	std::vector<VertexAttribute> layout_cube = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),0,false}, //position
+		{1,2,GL_FLOAT,GL_FALSE,(GLsizei)(5 * sizeof(float)),(size_t)(3 * sizeof(float)),false} //index 
+	};
+
+
 	Texture mTexture_cube(
 		vertices_cube,
+		sizeof(vertices_cube),     
 		indices_cube,
-		sizeof(vertices_cube) / sizeof(float),
-		sizeof(indices_cube)/sizeof(int)
+		sizeof(indices_cube),      
+		GL_UNSIGNED_INT,
+		layout_cube                
 	);
 
 	// âÊëúÇÃìoò^
@@ -268,6 +283,7 @@ int main(){
 
 	while(...){
 	    ...
+		
 		// view matrix
 		glm::mat4 view = glm::mat4(1.0f);
 		view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());

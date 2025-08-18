@@ -55,6 +55,10 @@
     <None Include="Coordinate.md" />
     <None Include="README.md" />
     <None Include="Camera.md" />
+    <None Include="vertex_color.glsl" />
+    <None Include="fragment_color.glsl" />
+    <None Include="vertex_light_cube.glsl" />
+    <None Include="fragment_light_cube.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -73,6 +77,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="camera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="vertex_layout.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
