@@ -59,6 +59,9 @@
     <None Include="fragment_color.glsl" />
     <None Include="vertex_light_cube.glsl" />
     <None Include="fragment_light_cube.glsl" />
+    <None Include="fragment_basic_lighting.glsl" />
+    <None Include="vertex_basic_lighting.glsl" />
+    <None Include="BasicLighting.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">

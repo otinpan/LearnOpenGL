@@ -94,7 +94,7 @@ int main() {
 	Shader mShader("vertex.glsl", "fragment.glsl");
 	Shader mShader_normal("vertex.glsl", "fragment.glsl");
 	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
-	Shader mShader_cube("vertex_color.glsl", "fragment_color.glsl");
+	Shader mShader_cube("vertex_basic_lighting.glsl", "fragment_basic_lighting.glsl");
 	Shader mShader_lighting("vertex_light_cube.glsl", "fragment_light_cube.glsl");
 
 	// ê}å`çÏê¨
@@ -253,42 +253,42 @@ int main() {
 	mShader_cube.setInt("texture1", 0);
 	mShader_cube.setInt("texture2", 1);*/
 
-	float vertices_linghting_cube[] = {
+	float vertices_cube[] = {
 		// Front (+Z)
-		-0.5f,-0.5f, 0.5f, 
-		 0.5f,-0.5f, 0.5f, 
-		 0.5f, 0.5f, 0.5f,
-		-0.5f, 0.5f, 0.5f,
+		-0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
+		 0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
 
 		// Back (-Z)
-		-0.5f,-0.5f,-0.5f,
-		 0.5f,-0.5f,-0.5f, 
-		 0.5f, 0.5f,-0.5f, 
-		-0.5f, 0.5f,-0.5f, 
+		-0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
+		 0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
+		 0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
+		-0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
 
 		// Left (-X)
-		-0.5f,-0.5f, 0.5f,
-		-0.5f,-0.5f,-0.5f, 
-		-0.5f, 0.5f,-0.5f, 
-		-0.5f, 0.5f, 0.5f,
-
+		-0.5f,-0.5f, 0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,-0.5f,-0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, 0.5f,-0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, 0.5f, 0.5f, -1.0f,  0.0f,  0.0f,
+		 
 		// Right (+X)
-		 0.5f,-0.5f, 0.5f,
-		 0.5f,-0.5f,-0.5f, 
-		 0.5f, 0.5f,-0.5f, 
-		 0.5f, 0.5f, 0.5f,
+		 0.5f,-0.5f, 0.5f, 1.0f,  0.0f,  0.0f,
+		 0.5f,-0.5f,-0.5f, 1.0f,  0.0f,  0.0f,
+		 0.5f, 0.5f,-0.5f, 1.0f,  0.0f,  0.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f,  0.0f,  0.0f,
 
 		// Bottom (-Y)
-		-0.5f,-0.5f,-0.5f, 
-		 0.5f,-0.5f,-0.5f, 
-		 0.5f,-0.5f, 0.5f, 
-		-0.5f,-0.5f, 0.5f, 
+		-0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f,
+		 0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f,
+		 0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f,
+		-0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f,
 
 		// Top (+Y)
-		-0.5f, 0.5f,-0.5f, 
-		 0.5f, 0.5f,-0.5f, 
-		 0.5f, 0.5f, 0.5f, 
-		-0.5f, 0.5f, 0.5f, 
+		-0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f,
+		 0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f,
 	};
 
 	unsigned int indices_cube[] = {
@@ -306,21 +306,47 @@ int main() {
 		20,21,22, 22,23,20
 	};
 
-	std::vector<VertexAttribute> layout_lighting_cube = {
-		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(3 * sizeof(float)),0,false},
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
-	Texture mLighting_cube(
-		vertices_linghting_cube,
-		sizeof(vertices_linghting_cube),
+	std::vector<VertexAttribute> layout_cube = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),0,false},
+		{1,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),(size_t)(3 * sizeof(float)),false} // normal vector
+	};
+
+	Texture mCube(
+		vertices_cube,
+		sizeof(vertices_cube),
 		indices_cube,
 		sizeof(indices_cube),
 		GL_UNSIGNED_INT,
-		layout_lighting_cube
+		layout_cube
 	);
 
 	// light ///////////////////////////////////////////////////////////
 	glm::vec3 mLightPos(1.2f, 1.0f, 2.0f);
+	std::vector<VertexAttribute> layout_light = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),0,false}
+	};
+
+	Texture mLight(
+		vertices_cube,
+		sizeof(vertices_cube),
+		indices_cube,
+		sizeof(indices_cube),
+		GL_UNSIGNED_INT,
+		layout_light
+	);
 
 
 
@@ -403,6 +429,9 @@ int main() {
 			mTexture_cube.draw();
 		}*/
 
+		mLightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+		mLightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
 		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -410,11 +439,28 @@ int main() {
 		mShader_cube.use();
 		mShader_cube.setMatrix4("view", view);
 		mShader_cube.setMatrix4("projection", projection);
-		mShader_cube.setMatrix4("model", model);
 		mShader_cube.setVec3("objectColor", glm::vec3(1.0f, 0.4, 0.31f));
 		mShader_cube.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		mShader_cube.setVec3("lightPos", mLightPos);
+		
+		for (unsigned int i = 0; i < 10; i++) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			if (i % 3 != 0) {
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			}
+			else {
+				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+			}
+			mShader_cube.setMatrix4("model", model);
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
 
-		mLighting_cube.draw();
+			mShader_cube.setMatrix3("normalMatrix", normalMatrix);
+			mCube.draw();
+		}
+
+		//mCube.draw();
 
 		// light////////////
 		mShader_lighting.use();
@@ -425,7 +471,7 @@ int main() {
 		model = glm::scale(model, glm::vec3(0.2f));
 		mShader_lighting.setMatrix4("model", model);
 
-		mLighting_cube.draw();
+		mLight.draw();
 		
 
 		glfwSwapBuffers(window);

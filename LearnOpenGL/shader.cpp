@@ -96,6 +96,7 @@ void Shader::setBool(const std::string& name, bool value) const {
 	GLint location = glGetUniformLocation(ID, name.c_str());
 	if (location == -1) {
 		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+		throw;
 	}
 	glUniform1i(location, (int)value);
 }
@@ -107,6 +108,7 @@ void Shader::setInt(const std::string& name, int value)const {
 	GLint location = glGetUniformLocation(ID, name.c_str());
 	if (location == -1) {
 		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+		throw;
 	}
 	glUniform1i(location, value);
 }
@@ -115,6 +117,7 @@ void Shader::setFloat(const std::string& name, float value)const {
 	GLint location = glGetUniformLocation(ID, name.c_str());
 	if (location == -1) {
 		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+		throw;
 	}
 	glUniform1f(location, value);
 }
@@ -123,15 +126,25 @@ void Shader::setMatrix4(const std::string& name, glm::mat4 matrix)const {
 	unsigned int location = glGetUniformLocation(ID, name.c_str());
 	if (location == -1) {
 		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+		throw;
 	}
-	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix
-	));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::setMatrix3(const std::string& name, glm::mat3 matrix)const {
+	unsigned int location = glGetUniformLocation(ID, name.c_str());
+	if (location == -1) {
+		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+		throw;
+	}
+	glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
 void Shader::setVec3(const std::string& name, glm::vec3 vec) const {
 	unsigned int location = glGetUniformLocation(ID, name.c_str());
 	if (location == -1) {
 		std::cerr << "Warning: uniform '" << name << "' not found or not used in shader.\n";
+		throw;
 	}
 	glUniform3fv(location, 1, glm::value_ptr(vec));
 }
