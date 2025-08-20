@@ -3,10 +3,10 @@ out vec4 FragColor;
 
 in vec3 Normal;
 in vec3 FragPos;
-in vec3 LightPos;
 
 uniform vec3 objectColor;
 uniform vec3 lightColor;
+uniform vec3 lightViewPos; // view‹óŠÔ‚Å“n‚·
 
 
 void main(){
@@ -16,7 +16,7 @@ void main(){
 
 	//difuse
 	vec3 norm=normalize(Normal);
-	vec3 lightDir=normalize(LightPos-FragPos);
+	vec3 lightDir=normalize(lightViewPos-FragPos);
 
 	float diff=max(dot(norm,lightDir),0.0);
 	vec3 diffuse=diff*lightColor;

@@ -14,6 +14,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "camera.h"
 #include "vertex_layout.h" 
+#include "cube.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -94,7 +95,7 @@ int main() {
 	Shader mShader("vertex.glsl", "fragment.glsl");
 	Shader mShader_normal("vertex.glsl", "fragment.glsl");
 	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
-	Shader mShader_cube("vertex_basic_lighting.glsl", "fragment_basic_lighting.glsl");
+	Shader mShader_cube("vertex_material.glsl", "fragment_material.glsl");
 	Shader mShader_lighting("vertex_light_cube.glsl", "fragment_light_cube.glsl");
 
 	// ê}å`çÏê¨
@@ -324,7 +325,7 @@ int main() {
 		{1,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),(size_t)(3 * sizeof(float)),false} // normal vector
 	};
 
-	Texture mCube(
+	Cube mCube(
 		vertices_cube,
 		sizeof(vertices_cube),
 		indices_cube,
@@ -335,11 +336,14 @@ int main() {
 
 	// light ///////////////////////////////////////////////////////////
 	glm::vec3 mLightPos(1.2f, 1.0f, 2.0f);
+	glm::vec3 mLightAmbient(0.2f, 0.2f, 0.2f);
+	glm::vec3 mLightDiffuse(0.5f, 0.5f, 0.5f);
+	glm::vec3 mLightSpecular(1.0f, 1.0f, 1.0f);
 	std::vector<VertexAttribute> layout_light = {
 		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),0,false}
 	};
 
-	Texture mLight(
+	Cube mLight(
 		vertices_cube,
 		sizeof(vertices_cube),
 		indices_cube,
@@ -439,10 +443,19 @@ int main() {
 		mShader_cube.use();
 		mShader_cube.setMatrix4("view", view);
 		mShader_cube.setMatrix4("projection", projection);
-		mShader_cube.setVec3("objectColor", glm::vec3(1.0f, 0.4, 0.31f));
-		mShader_cube.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-		mShader_cube.setVec3("lightPos", mLightPos);
-		
+		// material
+		mShader_cube.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+		mShader_cube.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+		mShader_cube.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		mShader_cube.setFloat("material.shininess", 32.0f);
+
+		// light
+		glm::vec3 lightViewPos = glm::vec3(view * glm::vec4(mLightPos, 1.0f));
+		mShader_cube.setVec3("light.viewPosition", lightViewPos);
+		mShader_cube.setVec3("light.ambient", mLightAmbient);
+		mShader_cube.setVec3("light.diffuse", mLightDiffuse);
+		mShader_cube.setVec3("light.specular", mLightSpecular);
+
 		for (unsigned int i = 0; i < 10; i++) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);

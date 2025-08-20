@@ -4,8 +4,6 @@ layout (location=1) in vec3 aNormal;
 
 out vec3 Normal;
 out vec3 FragPos;
-out vec3 LightPos;
-
 
 uniform mat4 model;
 uniform mat4 view;

@@ -42,6 +42,9 @@
     <ClCompile Include="camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="cube.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="StartOpenGL.md" />
@@ -62,6 +65,9 @@
     <None Include="fragment_basic_lighting.glsl" />
     <None Include="vertex_basic_lighting.glsl" />
     <None Include="BasicLighting.md" />
+    <None Include="vertex_material.glsl" />
+    <None Include="fragment_material.glsl" />
+    <None Include="Material.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -83,6 +89,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="vertex_layout.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="cube.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

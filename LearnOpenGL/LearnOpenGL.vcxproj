@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="cube.cpp" />
     <ClCompile Include="exercise1.cpp" />
     <ClCompile Include="fragment_shader.cpp" />
     <ClCompile Include="glad.c" />
@@ -154,8 +155,10 @@
     <None Include="fragment_basic_lighting.glsl" />
     <None Include="fragment_light_cube.glsl" />
     <None Include="fragment_color.glsl" />
+    <None Include="fragment_material.glsl" />
     <None Include="fragment_texture.glsl" />
     <None Include="fragment_normal.glsl" />
+    <None Include="Material.md" />
     <None Include="README.md" />
     <None Include="StartOpenGL.md" />
     <None Include="Shader.md" />
@@ -164,10 +167,12 @@
     <None Include="vertex_basic_lighting.glsl" />
     <None Include="vertex_color.glsl" />
     <None Include="vertex_light_cube.glsl" />
+    <None Include="vertex_material.glsl" />
     <None Include="vertex_texture.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="cube.h" />
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="std_image.h" />
