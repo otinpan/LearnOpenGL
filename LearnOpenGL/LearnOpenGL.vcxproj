@@ -153,6 +153,7 @@
     <None Include="Coordinate.md" />
     <None Include="fragment.glsl" />
     <None Include="fragment_basic_lighting.glsl" />
+    <None Include="fragment_diffuse_map.glsl" />
     <None Include="fragment_light_cube.glsl" />
     <None Include="fragment_color.glsl" />
     <None Include="fragment_material.glsl" />
@@ -166,6 +167,7 @@
     <None Include="vertex.glsl" />
     <None Include="vertex_basic_lighting.glsl" />
     <None Include="vertex_color.glsl" />
+    <None Include="vertex_diffuse_map.glsl" />
     <None Include="vertex_light_cube.glsl" />
     <None Include="vertex_material.glsl" />
     <None Include="vertex_texture.glsl" />

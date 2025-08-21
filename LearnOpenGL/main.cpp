@@ -95,7 +95,7 @@ int main() {
 	Shader mShader("vertex.glsl", "fragment.glsl");
 	Shader mShader_normal("vertex.glsl", "fragment.glsl");
 	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
-	Shader mShader_cube("vertex_material.glsl", "fragment_material.glsl");
+	Shader mShader_cube("vertex_diffuse_map.glsl", "fragment_diffuse_map.glsl");
 	Shader mShader_lighting("vertex_light_cube.glsl", "fragment_light_cube.glsl");
 
 	// ê}å`çÏê¨
@@ -256,40 +256,40 @@ int main() {
 
 	float vertices_cube[] = {
 		// Front (+Z)
-		-0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
-		 0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
-		 0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
+		-0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,0.0f,
+		 0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 1.0f,0.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 1.0f,1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,1.0f,
 
 		// Back (-Z)
-		-0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
-		 0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
-		 0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
-		-0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f,
+		-0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 0.0f,0.0f,
+		 0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 1.0f,0.0f,
+		 0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 1.0f,1.0f,
+		-0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 0.0f,1.0f,
 
 		// Left (-X)
-		-0.5f,-0.5f, 0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,-0.5f,-0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, 0.5f,-0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, 0.5f, 0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,-0.5f, 0.5f, -1.0f,  0.0f,  0.0f, 0.0f,0.0f,
+		-0.5f,-0.5f,-0.5f, -1.0f,  0.0f,  0.0f, 1.0f,0.0f,
+		-0.5f, 0.5f,-0.5f, -1.0f,  0.0f,  0.0f, 1.0f,1.0f,
+		-0.5f, 0.5f, 0.5f, -1.0f,  0.0f,  0.0f, 0.0f,1.0f,
 		 
 		// Right (+X)
-		 0.5f,-0.5f, 0.5f, 1.0f,  0.0f,  0.0f,
-		 0.5f,-0.5f,-0.5f, 1.0f,  0.0f,  0.0f,
-		 0.5f, 0.5f,-0.5f, 1.0f,  0.0f,  0.0f,
-		 0.5f, 0.5f, 0.5f, 1.0f,  0.0f,  0.0f,
+		 0.5f,-0.5f, 0.5f, 1.0f,  0.0f,  0.0f, 0.0f,0.0f,
+		 0.5f,-0.5f,-0.5f, 1.0f,  0.0f,  0.0f, 1.0f,0.0f,
+		 0.5f, 0.5f,-0.5f, 1.0f,  0.0f,  0.0f, 1.0f,1.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f,  0.0f,  0.0f, 0.0f,1.0f,
 
 		// Bottom (-Y)
-		-0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f,
-		 0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f,
-		 0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f,
-		-0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f,
+		-0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+		 0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f, 1.0f,0.0f,
+		 0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f, 1.0f,1.0f,
+		-0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f, 0.0f,1.0f,
 
 		// Top (+Y)
-		-0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f,
-		 0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f,
-		 0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f,
+		-0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f, 0.0f,0.0f,
+		 0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f, 1.0f,0.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f, 1.0f,1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f, 0.0f,1.0f,
 	};
 
 	unsigned int indices_cube[] = {
@@ -321,11 +321,12 @@ int main() {
 	};
 
 	std::vector<VertexAttribute> layout_cube = {
-		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),0,false},
-		{1,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),(size_t)(3 * sizeof(float)),false} // normal vector
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),0,false},
+		{1,3,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),(size_t)(3 * sizeof(float)),false}, // normal vector
+		{2,2,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),(size_t)(6 * sizeof(float)),false} // texture coordinates
 	};
 
-	Cube mCube(
+	Texture mCube(
 		vertices_cube,
 		sizeof(vertices_cube),
 		indices_cube,
@@ -333,6 +334,12 @@ int main() {
 		GL_UNSIGNED_INT,
 		layout_cube
 	);
+	mCube.initializeTexture("Assets/container2.png", 0);
+	mCube.initializeTexture("Assets/container2_specular.png", 1);
+
+	mShader_cube.use();
+	mShader_cube.setInt("material.diffuse", 0);
+	mShader_cube.setInt("material.specular", 1);
 
 	// light ///////////////////////////////////////////////////////////
 	glm::vec3 mLightPos(1.2f, 1.0f, 2.0f);
@@ -340,7 +347,7 @@ int main() {
 	glm::vec3 mLightDiffuse(0.5f, 0.5f, 0.5f);
 	glm::vec3 mLightSpecular(1.0f, 1.0f, 1.0f);
 	std::vector<VertexAttribute> layout_light = {
-		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(6 * sizeof(float)),0,false}
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),0,false}
 	};
 
 	Cube mLight(
@@ -444,9 +451,6 @@ int main() {
 		mShader_cube.setMatrix4("view", view);
 		mShader_cube.setMatrix4("projection", projection);
 		// material
-		mShader_cube.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-		mShader_cube.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-		mShader_cube.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 		mShader_cube.setFloat("material.shininess", 32.0f);
 
 		// light

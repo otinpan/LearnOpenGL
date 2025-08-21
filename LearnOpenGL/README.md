@@ -651,3 +651,144 @@ float vertices_cube[] = {
 		mLight.draw();
 	}
 ```
+
+## Diffuse Map
+
+```cpp
+	float vertices_cube[] = {
+		// Front (+Z)
+		-0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,0.0f,
+		 0.5f,-0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 1.0f,0.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 1.0f,1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,1.0f,
+
+		// Back (-Z)
+		-0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 0.0f,0.0f,
+		 0.5f,-0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 1.0f,0.0f,
+		 0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 1.0f,1.0f,
+		-0.5f, 0.5f,-0.5f, 0.0f,  0.0f, -1.0f, 0.0f,1.0f,
+
+		// Left (-X)
+		-0.5f,-0.5f, 0.5f, -1.0f,  0.0f,  0.0f, 0.0f,0.0f,
+		-0.5f,-0.5f,-0.5f, -1.0f,  0.0f,  0.0f, 1.0f,0.0f,
+		-0.5f, 0.5f,-0.5f, -1.0f,  0.0f,  0.0f, 1.0f,1.0f,
+		-0.5f, 0.5f, 0.5f, -1.0f,  0.0f,  0.0f, 0.0f,1.0f,
+		 
+		// Right (+X)
+		 0.5f,-0.5f, 0.5f, 1.0f,  0.0f,  0.0f, 0.0f,0.0f,
+		 0.5f,-0.5f,-0.5f, 1.0f,  0.0f,  0.0f, 1.0f,0.0f,
+		 0.5f, 0.5f,-0.5f, 1.0f,  0.0f,  0.0f, 1.0f,1.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f,  0.0f,  0.0f, 0.0f,1.0f,
+
+		// Bottom (-Y)
+		-0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+		 0.5f,-0.5f,-0.5f, 0.0f, -1.0f,  0.0f, 1.0f,0.0f,
+		 0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f, 1.0f,1.0f,
+		-0.5f,-0.5f, 0.5f, 0.0f, -1.0f,  0.0f, 0.0f,1.0f,
+
+		// Top (+Y)
+		-0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f, 0.0f,0.0f,
+		 0.5f, 0.5f,-0.5f, 0.0f,  1.0f,  0.0f, 1.0f,0.0f,
+		 0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f, 1.0f,1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f,  1.0f,  0.0f, 0.0f,1.0f,
+	};
+
+	unsigned int indices_cube[] = {
+		// ëOñ 
+		0, 1, 2,  2, 3, 0,
+		// îwñ 
+		4, 5, 6,  6, 7, 4,
+		// ç∂ë§ñ 
+		8, 9,10, 10,11, 8,
+		// âEë§ñ 
+		12,13,14, 14,15,12,
+		// íÍñ 
+		16,17,18, 18,19,16,
+		// è„ñ 
+		20,21,22, 22,23,20
+	};
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+	std::vector<VertexAttribute> layout_cube = {
+		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),0,false},
+		{1,3,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),(size_t)(3 * sizeof(float)),false}, // normal vector
+		{2,2,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),(size_t)(6 * sizeof(float)),false} // texture coordinates
+	};
+
+	Texture mCube(
+		vertices_cube,
+		sizeof(vertices_cube),
+		indices_cube,
+		sizeof(indices_cube),
+		GL_UNSIGNED_INT,
+		layout_cube
+	);
+	mCube.initializeTexture("Assets/container2.png", 0);
+	mCube.initializeTexture("Assets/container2_specular.png", 1);
+
+	mShader_cube.use();
+	mShader_cube.setInt("material.diffuse", 0);
+	mShader_cube.setInt("material.specular", 1);
+
+	while(...){
+		...
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+		mShader_cube.use();
+		mShader_cube.setMatrix4("view", view);
+		mShader_cube.setMatrix4("projection", projection);
+		// material
+		mShader_cube.setFloat("material.shininess", 32.0f);
+
+		// light
+		glm::vec3 lightViewPos = glm::vec3(view * glm::vec4(mLightPos, 1.0f));
+		mShader_cube.setVec3("light.viewPosition", lightViewPos);
+		mShader_cube.setVec3("light.ambient", mLightAmbient);
+		mShader_cube.setVec3("light.diffuse", mLightDiffuse);
+		mShader_cube.setVec3("light.specular", mLightSpecular);
+
+		for (unsigned int i = 0; i < 10; i++) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			if (i % 3 != 0) {
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			}
+			else {
+				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+			}
+			mShader_cube.setMatrix4("model", model);
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
+
+			mShader_cube.setMatrix3("normalMatrix", normalMatrix);
+			mCube.draw();
+		}
+
+		//mCube.draw();
+
+		// light////////////
+		mShader_lighting.use();
+		mShader_lighting.setMatrix4("projection", projection);
+		mShader_lighting.setMatrix4("view", view);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, mLightPos);
+		model = glm::scale(model, glm::vec3(0.2f));
+		mShader_lighting.setMatrix4("model", model);
+
+		mLight.draw();
+	}
+	```

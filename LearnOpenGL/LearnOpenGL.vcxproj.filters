@@ -68,6 +68,8 @@
     <None Include="vertex_material.glsl" />
     <None Include="fragment_material.glsl" />
     <None Include="Material.md" />
+    <None Include="vertex_diffuse_map.glsl" />
+    <None Include="fragment_diffuse_map.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
