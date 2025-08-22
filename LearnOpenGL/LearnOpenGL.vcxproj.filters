@@ -70,6 +70,15 @@
     <None Include="Material.md" />
     <None Include="vertex_diffuse_map.glsl" />
     <None Include="fragment_diffuse_map.glsl" />
+    <None Include="vertex_directional_light.glsl" />
+    <None Include="fragment_directional_light.glsl" />
+    <None Include="vertex_point_light.glsl" />
+    <None Include="fragment_point_light.glsl" />
+    <None Include="vertex_spotlight.glsl" />
+    <None Include="fragment_spotlight.glsl" />
+    <None Include="vertex_combined_light.glsl" />
+    <None Include="fragment_combined_light.glsl" />
+    <None Include="LightCasters.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">

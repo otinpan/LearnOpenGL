@@ -792,3 +792,156 @@ float vertices_cube[] = {
 		mLight.draw();
 	}
 ```
+
+## Point light
+```cpp
+	Shader mShader_cube("vertex_point_light.glsl", "fragment_point_light.glsl");
+
+	while(...){
+		...
+		mLightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+		mLightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+		// Shader_cube //////////////////////////////////////
+		mShader_cube.use();
+		mShader_cube.setMatrix4("view", view);
+		mShader_cube.setMatrix4("projection", projection);
+
+		// camera
+		mShader_cube.setVec3("viewPos", mCamera.getPosition());
+
+		// material
+		mShader_cube.setFloat("material.shininess", 32.0f);
+
+		// light
+		mShader_cube.setVec3("light.position", mLightPos);
+		mShader_cube.setVec3("light.ambient", mLightAmbient);
+		mShader_cube.setVec3("light.diffuse", mLightDiffuse);
+		mShader_cube.setVec3("light.specular", mLightSpecular);
+		// point light
+		mShader_cube.setFloat("light.constant", 1.0f);
+		mShader_cube.setFloat("light.linear", 0.07f);
+		mShader_cube.setFloat("light.quadratic", 0.017f);
+
+
+		for (unsigned int i = 0; i < 10; i++) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			if (i % 3 != 0) {
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			}
+			else {
+				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+			}
+			mShader_cube.setMatrix4("model", model);
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+
+			mShader_cube.setMatrix3("normalMatrix", normalMatrix);
+			mCube.draw();
+		}
+	}
+```
+
+## Spotlight
+```cpp
+Shader mShader_cube("vertex_spot_light.glsl", "fragment_spot_light.glsl");
+	while(...){
+		...
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+		// Shader_cube //////////////////////////////////////
+		mShader_cube.use();
+		mShader_cube.setMatrix4("view", view);
+		mShader_cube.setMatrix4("projection", projection);
+
+		// camera
+		mShader_cube.setVec3("viewPos", mCamera.getPosition());
+
+		// material
+		mShader_cube.setFloat("material.shininess", 32.0f);
+
+		// light
+		mShader_cube.setVec3("light.position", mCamera.getPosition());
+		mShader_cube.setVec3("light.direction", mCamera.getFront());
+		mShader_cube.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		mShader_cube.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+		mShader_cube.setVec3("light.ambient", mLightAmbient);
+		mShader_cube.setVec3("light.diffuse", mLightDiffuse);
+		mShader_cube.setVec3("light.specular", mLightSpecular);
+		// point light
+		mShader_cube.setFloat("light.constant", 1.0f);
+		mShader_cube.setFloat("light.linear", 0.07f);
+		mShader_cube.setFloat("light.quadratic", 0.017f);
+
+
+		for (unsigned int i = 0; i < 10; i++) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			if (i % 3 != 0) {
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			}
+			else {
+				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+			}
+			mShader_cube.setMatrix4("model", model);
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+
+			mShader_cube.setMatrix3("normalMatrix", normalMatrix);
+			mCube.draw();
+		}
+```
+
+## Combined
+```cpp
+Shader mShader_cube("vertex_combined.glsl", "fragment_combined.glsl");
+
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+		// Shader_cube //////////////////////////////////////
+		mShader_cube.use();
+		mShader_cube.setMatrix4("view", view);
+		mShader_cube.setMatrix4("projection", projection);
+
+		// camera
+		mShader_cube.setVec3("viewPos", mCamera.getPosition());
+
+		// material
+		mShader_cube.setFloat("material.shininess", 32.0f);
+
+		//directional light ///////////////////////////
+		mShader_cube.setVec3("dirLight.direction", glm::vec3(1.0f, 0.3f, 0.5f));
+		mShader_cube.setVec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+		mShader_cube.setVec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
+		mShader_cube.setVec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
+
+		// point light /////////////////////////////////
+		mShader_cube.setVec3("pointLight.position", mLightPos);
+		mShader_cube.setVec3("pointLight.ambient", mLightAmbient);
+		mShader_cube.setVec3("pointLight.diffuse", mLightDiffuse);
+		mShader_cube.setVec3("pointLight.specular", mLightSpecular);
+		mShader_cube.setFloat("pointLight.constant", 1.0f);
+		mShader_cube.setFloat("pointLight.linear", 0.09f);
+		mShader_cube.setFloat("pointLight.quadratic", 0.032f);
+
+		// spotlight /////////////////////////////////////
+		mShader_cube.setVec3("spotlight.position", mCamera.getPosition());
+		mShader_cube.setVec3("spotlight.direction", mCamera.getFront());
+		mShader_cube.setFloat("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
+		mShader_cube.setFloat("spotlight.outerCutOff", glm::cos(glm::radians(16.0f)));
+		mShader_cube.setVec3("spotlight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+		mShader_cube.setVec3("spotlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		mShader_cube.setVec3("spotlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		mShader_cube.setFloat("spotlight.constant", 1.0f);
+		mShader_cube.setFloat("spotlight.linear", 0.09f);
+		mShader_cube.setFloat("spotlight.quadratic", 0.032f);
+```

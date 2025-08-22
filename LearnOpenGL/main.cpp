@@ -95,7 +95,7 @@ int main() {
 	Shader mShader("vertex.glsl", "fragment.glsl");
 	Shader mShader_normal("vertex.glsl", "fragment.glsl");
 	Shader mShader_texture("vertex_texture.glsl", "fragment_texture.glsl");
-	Shader mShader_cube("vertex_diffuse_map.glsl", "fragment_diffuse_map.glsl");
+	Shader mShader_cube("vertex_combined_light.glsl", "fragment_combined_light.glsl");
 	Shader mShader_lighting("vertex_light_cube.glsl", "fragment_light_cube.glsl");
 
 	// ê}å`çÏê¨
@@ -137,7 +137,7 @@ int main() {
 		layout_texture
 	);
 
-	mTexture.initializeTexture("Assets/container.jpg", 0);
+	mTexture.initializeTexture("Assets/container2.png", 0);
 	mTexture.initializeTexture("Assets/awesome_face.jpg", 1);
 	
 
@@ -158,7 +158,8 @@ int main() {
 
 	mShader_texture.setMatrix4("model", model);
 	mShader_texture.setMatrix4("view", view);
-	mShader_texture.setMatrix4("projection", projection);*/
+	mShader_texture.setMatrix4("projection", projection);
+	*/
 
 
 	// depth 
@@ -341,10 +342,11 @@ int main() {
 	mShader_cube.setInt("material.diffuse", 0);
 	mShader_cube.setInt("material.specular", 1);
 
+
 	// light ///////////////////////////////////////////////////////////
 	glm::vec3 mLightPos(1.2f, 1.0f, 2.0f);
-	glm::vec3 mLightAmbient(0.2f, 0.2f, 0.2f);
-	glm::vec3 mLightDiffuse(0.5f, 0.5f, 0.5f);
+	glm::vec3 mLightAmbient(0.1f, 0.1f, 0.1f);
+	glm::vec3 mLightDiffuse(0.8f, 0.8f, 0.8f);
 	glm::vec3 mLightSpecular(1.0f, 1.0f, 1.0f);
 	std::vector<VertexAttribute> layout_light = {
 		{0,3,GL_FLOAT,GL_FALSE,(GLsizei)(8 * sizeof(float)),0,false}
@@ -368,7 +370,7 @@ int main() {
 
 		processInput(window);
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
 		/*
@@ -387,11 +389,11 @@ int main() {
 		mShader_normal.use();
 		mShader_normal.setFloat("xOffset", xOffset); //xï˚å¸Ç…ïΩçsà⁄ìÆ
 		mShader_normal.setFloat("yOffset", yOffset); //yï˚å¸Ç…ïΩçsà⁄ìÆ
-		mRectangle.draw();
+		mRectangle.draw();*/
 
 
-		// GLM matrix
-		glm::mat4 transform1 = glm::mat4(1.0f);
+		// Texture
+		/*glm::mat4 transform1 = glm::mat4(1.0f);
 		transform1 = glm::translate(transform1, glm::vec3(0.5f, -0.5f, 0.0f));
 		transform1 = glm::rotate(transform1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -401,44 +403,13 @@ int main() {
 
 		// Texture
 		mShader_texture.use();
-		mShader_texture.setMatrix4("transform", transform1);
 		mTexture.draw();
 		mShader_texture.setFloat("mixValue", mixValue);
 
-		mShader_texture.setMatrix4("transform", transform2);
-		mTexture.draw();
-		*/
+		mTexture.draw();*/
+		
 
 
-		// model matrix
-		/*glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));*/
-
-		// view matrix
-		/*glm::mat4 view = glm::mat4(1.0f);
-		view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
-
-		// projection matrix
-		projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		mShader_cube.use();
-
-		mShader_cube.setMatrix4("view", view);
-		mShader_cube.setMatrix4("projection", projection);
-		mShader_cube.setFloat("mixValue", mixValue);
-
-		for (unsigned int i = 0; i < 10; i++) {
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			if (i % 3 != 0) {
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			}
-			else {
-				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-			}
-			mShader_cube.setMatrix4("model", model);
-			mTexture_cube.draw();
-		}*/
 
 		mLightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
 		mLightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
@@ -447,18 +418,44 @@ int main() {
 		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
 		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+		// Shader_cube //////////////////////////////////////
 		mShader_cube.use();
 		mShader_cube.setMatrix4("view", view);
 		mShader_cube.setMatrix4("projection", projection);
+
+		// camera
+		mShader_cube.setVec3("viewPos", mCamera.getPosition());
+
 		// material
 		mShader_cube.setFloat("material.shininess", 32.0f);
 
-		// light
-		glm::vec3 lightViewPos = glm::vec3(view * glm::vec4(mLightPos, 1.0f));
-		mShader_cube.setVec3("light.viewPosition", lightViewPos);
-		mShader_cube.setVec3("light.ambient", mLightAmbient);
-		mShader_cube.setVec3("light.diffuse", mLightDiffuse);
-		mShader_cube.setVec3("light.specular", mLightSpecular);
+		//directional light ///////////////////////////
+		mShader_cube.setVec3("dirLight.direction", glm::vec3(1.0f, 0.3f, 0.5f));
+		mShader_cube.setVec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+		mShader_cube.setVec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
+		mShader_cube.setVec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
+
+		// point light /////////////////////////////////
+		mShader_cube.setVec3("pointLight.position", mLightPos);
+		mShader_cube.setVec3("pointLight.ambient", mLightAmbient);
+		mShader_cube.setVec3("pointLight.diffuse", mLightDiffuse);
+		mShader_cube.setVec3("pointLight.specular", mLightSpecular);
+		mShader_cube.setFloat("pointLight.constant", 1.0f);
+		mShader_cube.setFloat("pointLight.linear", 0.09f);
+		mShader_cube.setFloat("pointLight.quadratic", 0.032f);
+
+		// spotlight /////////////////////////////////////
+		mShader_cube.setVec3("spotlight.position", mCamera.getPosition());
+		mShader_cube.setVec3("spotlight.direction", mCamera.getFront());
+		mShader_cube.setFloat("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
+		mShader_cube.setFloat("spotlight.outerCutOff", glm::cos(glm::radians(16.0f)));
+		mShader_cube.setVec3("spotlight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+		mShader_cube.setVec3("spotlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		mShader_cube.setVec3("spotlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		mShader_cube.setFloat("spotlight.constant", 1.0f);
+		mShader_cube.setFloat("spotlight.linear", 0.09f);
+		mShader_cube.setFloat("spotlight.quadratic", 0.032f);
+
 
 		for (unsigned int i = 0; i < 10; i++) {
 			model = glm::mat4(1.0f);
@@ -471,7 +468,7 @@ int main() {
 				model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
 			}
 			mShader_cube.setMatrix4("model", model);
-			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 
 			mShader_cube.setMatrix3("normalMatrix", normalMatrix);
 			mCube.draw();

@@ -153,12 +153,17 @@
     <None Include="Coordinate.md" />
     <None Include="fragment.glsl" />
     <None Include="fragment_basic_lighting.glsl" />
+    <None Include="fragment_combined_light.glsl" />
     <None Include="fragment_diffuse_map.glsl" />
+    <None Include="fragment_directional_light.glsl" />
     <None Include="fragment_light_cube.glsl" />
     <None Include="fragment_color.glsl" />
     <None Include="fragment_material.glsl" />
+    <None Include="fragment_point_light.glsl" />
+    <None Include="fragment_spotlight.glsl" />
     <None Include="fragment_texture.glsl" />
     <None Include="fragment_normal.glsl" />
+    <None Include="LightCasters.md" />
     <None Include="Material.md" />
     <None Include="README.md" />
     <None Include="StartOpenGL.md" />
@@ -167,9 +172,13 @@
     <None Include="vertex.glsl" />
     <None Include="vertex_basic_lighting.glsl" />
     <None Include="vertex_color.glsl" />
+    <None Include="vertex_combined_light.glsl" />
     <None Include="vertex_diffuse_map.glsl" />
+    <None Include="vertex_directional_light.glsl" />
     <None Include="vertex_light_cube.glsl" />
     <None Include="vertex_material.glsl" />
+    <None Include="vertex_point_light.glsl" />
+    <None Include="vertex_spotlight.glsl" />
     <None Include="vertex_texture.glsl" />
   </ItemGroup>
   <ItemGroup>
