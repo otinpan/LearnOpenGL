@@ -1,6 +1,6 @@
 #include "texture.h"
 #include <iostream>
-#include"std_image.h"
+#include"stb_image.h"
 
 Texture::Texture(const float* vertices, size_t vertexBytes, const unsigned int* indices,  size_t indexBytes,GLenum indexType,
 	const std::vector<VertexAttribute>& layout)

@@ -116,7 +116,9 @@
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /E /Y /I "$(ProjectDir)Assets" "$(OutDir)Assets"</Command>
+      <Command>xcopy /E /Y /I "$(ProjectDir)Assets" "$(OutDir)Assets"
+copy /Y "D:\OpenGLDev\Libs\assimp-vc143-mtd.dll" "$(OutDir)"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,6 +145,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -160,6 +163,7 @@
     <None Include="fragment_light_cube.glsl" />
     <None Include="fragment_color.glsl" />
     <None Include="fragment_material.glsl" />
+    <None Include="fragment_model.glsl" />
     <None Include="fragment_point_light.glsl" />
     <None Include="fragment_spotlight.glsl" />
     <None Include="fragment_texture.glsl" />
@@ -178,6 +182,7 @@
     <None Include="vertex_directional_light.glsl" />
     <None Include="vertex_light_cube.glsl" />
     <None Include="vertex_material.glsl" />
+    <None Include="vertex_model.glsl" />
     <None Include="vertex_point_light.glsl" />
     <None Include="vertex_spotlight.glsl" />
     <None Include="vertex_texture.glsl" />
@@ -186,9 +191,10 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="shader.h" />
-    <ClInclude Include="std_image.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="triangle.h" />
     <ClInclude Include="vertex_layout.h" />

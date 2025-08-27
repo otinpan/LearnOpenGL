@@ -22,8 +22,8 @@ struct VertexInfo {
 
 struct TextureInfo {
 	unsigned int id;
-	string type;
-	string path;
+	string type; // texture_diffuse, texture_specular, texture_normal, texture_heightなど
+	string path; // textureが読み込まれた元のファイルのパス
 };
 
 class Mesh {
