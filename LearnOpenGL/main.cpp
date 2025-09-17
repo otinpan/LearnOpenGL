@@ -206,7 +206,7 @@ int main() {
 
 	// light ///////////////////////////////////////////////////////////
 	glm::vec3 mLightPos(1.2f, 1.0f, 2.0f);
-	glm::vec3 mLightAmbient(0.1f, 0.1f, 0.1f);
+	glm::vec3 mLightAmbient(0.8f, 0.8f, 0.8f);
 	glm::vec3 mLightDiffuse(0.8f, 0.8f, 0.8f);
 	glm::vec3 mLightSpecular(1.0f, 1.0f, 1.0f);
 	std::vector<VertexAttribute> layout_light = {
@@ -247,15 +247,15 @@ int main() {
 		mShader_model.use();
 		mShader_model.setMatrix4("view", view);
 		mShader_model.setMatrix4("projection", projection);
-		mShader_model.setMatrix3("model", model);
-		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
-		mShader_model.setMatrix3("normalMatrix", normalMatrix);
+		mShader_model.setMatrix4("model", model);
+		//glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+		//mShader_model.setMatrix3("normalMatrix", normalMatrix);
 
 		// Directional light
-		mShader_model.setVec3("dirLight.direction", glm::vec3(1.0f, 0.3f, 0.5f));
-		mShader_model.setVec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-		mShader_model.setVec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
-		mShader_model.setVec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
+		/*mShader_model.setVec3("dirLight.direction", glm::vec3(1.0f, 0.3f, 0.5f));
+		mShader_model.setVec3("dirLight.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+		mShader_model.setVec3("dirLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+		mShader_model.setVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
 		// Point light
 		mShader_model.setVec3("pointLight.position", mLightPos);
@@ -271,12 +271,12 @@ int main() {
 		mShader_model.setVec3("spotlight.direction", mCamera.getFront());
 		mShader_model.setFloat("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
 		mShader_model.setFloat("spotlight.outerCutOff", glm::cos(glm::radians(15.0f)));
-		mShader_model.setVec3("spotlight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
-		mShader_model.setVec3("spotlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		mShader_model.setVec3("spotlight.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+		mShader_model.setVec3("spotlight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
 		mShader_model.setVec3("spotlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		mShader_model.setFloat("spotlight.constant", 1.0f);
 		mShader_model.setFloat("spotlight.linear", 0.09f);
-		mShader_model.setFloat("spotlight.quadratic", 0.032f);
+		mShader_model.setFloat("spotlight.quadratic", 0.032f);*/
 
 		// light////////////
 		mShader_lighting.use();
@@ -289,6 +289,7 @@ int main() {
 
 		mLight.draw();
 
+		mShader_model.use();
 		mModel.draw(mShader_model);
 		
 

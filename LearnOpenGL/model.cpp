@@ -20,14 +20,17 @@ void Model::draw(Shader& shader) {
 void Model::loadModel(string const& path) {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		cout << "ERROR::ASSIMP::" << importer.GetErrorString() << endl;
+	// check for errors
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+	{
+		cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
 		return;
 	}
+	// retrieve the directory path of the filepath
+	directory = path.substr(0, path.find_last_of('/'));
 
-	auto pos = path.find_last_of("/\\");
-	directory = (pos == std::string::npos) ? std::string() : path.substr(0, pos);
 
+	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
 
 }
@@ -35,15 +38,19 @@ void Model::loadModel(string const& path) {
 void Model::processNode(aiNode* node, const aiScene* scene) {
 
 	// nodeに含まれるmeshを追加
-	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+	for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	{
+		// the node object only contains indices to index the actual objects in the scene. 
+		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		meshes.push_back(processMesh(mesh, scene));
 	}
-
-	// 再帰的に子ノードを処理
-	for (unsigned int i = 0; i < node->mNumChildren; i++) {
+	// 再帰的にノードを処理
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+	{
 		processNode(node->mChildren[i], scene);
 	}
+
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
@@ -122,6 +129,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	vector<TextureInfo> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
+
+
 	return Mesh(vertices, indices, textures);
 }
 
@@ -142,7 +151,7 @@ vector<TextureInfo> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType t
 		}
 		if (!skip) {
 			TextureInfo texture;
-			texture.id = TextureFromFile(str.C_Str(), this->directory,gammaCorrection);
+			texture.id = TextureFromFile(str.C_Str(), this->directory, gammaCorrection);
 			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);
@@ -158,14 +167,21 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 	string filename = string(path);
 	filename = directory + '/' + filename;
 
+
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
 
 	if (data) {
-		GLenum format = (nrChannels == 1) ? GL_RED : (nrChannels == 3) ? GL_RGB : GL_RGBA;
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
