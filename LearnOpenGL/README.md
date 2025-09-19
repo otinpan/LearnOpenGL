@@ -945,3 +945,42 @@ Shader mShader_cube("vertex_combined.glsl", "fragment_combined.glsl");
 		mShader_cube.setFloat("spotlight.linear", 0.09f);
 		mShader_cube.setFloat("spotlight.quadratic", 0.032f);
 ```
+
+## model
+```cpp
+	// model ///////////////////////////////////////////////////////////
+	Model mModel("Assets/objects/backpack/backpack.obj");
+
+
+
+	while (!glfwWindowShouldClose(window)) {
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glm::mat4 view = glm::lookAt(mCamera.getPosition(), mCamera.getPosition() + mCamera.getFront(), mCamera.getUp());
+		glm::mat4 projection = glm::perspective(glm::radians(mCamera.getFov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+		// Shader model
+		mShader_model.use();
+		mShader_model.setMatrix4("view", view);
+		mShader_model.setMatrix4("projection", projection);
+		mShader_model.setMatrix4("model", model);
+		
+		mShader_model.use();
+		mModel.draw(mShader_model);
+		
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+
+	}
+```

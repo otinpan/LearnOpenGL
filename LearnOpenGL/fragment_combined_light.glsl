@@ -73,7 +73,7 @@ vec3 calcSpotlight(Spotlight light,vec3 norm, vec3 viewDir){
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;  
     float theta = dot(lightDir, normalize(-light.direction)); 
-    float epsilon = light.outerCutOff - light.cutOff;
+    float epsilon = light.cutOff-light.outerCutOff;
     float intensity = clamp((theta - light.cutOff) / epsilon, 0.0, 1.0);
     diffuse  *= intensity;
     specular *= intensity;

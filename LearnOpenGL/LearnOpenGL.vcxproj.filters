@@ -87,6 +87,7 @@
     <None Include="LightCasters.md" />
     <None Include="vertex_model.glsl" />
     <None Include="fragment_model.glsl" />
+    <None Include="DepthTesting.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
